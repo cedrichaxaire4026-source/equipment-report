@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a3a5c">
+<title>Equipment Report – TEPA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1a3a5c;--blue2:#2563a8;--blue-light:#e8f0f8;
+  --green:#16a34a;--green-light:#dcfce7;
+  --red:#dc2626;--red-light:#fee2e2;
+  --amber:#d97706;--amber-light:#fef3c7;
+  --gray:#6b7280;--gray-light:#f3f4f6;--gray-border:#e5e7eb;
+  --white:#ffffff;--text:#111827;--text2:#374151;--text3:#6b7280;
+  --radius:8px;--radius-lg:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f4f8;color:var(--text);font-size:14px;min-height:100vh}
+/* Header */
+.app-header{background:var(--blue);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.app-header h1{font-size:15px;font-weight:600;flex:1}
+.app-header .tag{font-size:11px;background:rgba(255,255,255,.15);padding:3px 8px;border-radius:20px}
+/* Nav tabs */
+.nav-tabs{background:var(--blue);padding:0 16px;display:flex;gap:4px;border-top:1px solid rgba(255,255,255,.1);overflow-x:auto;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{color:rgba(255,255,255,.65);font-size:12px;font-weight:500;padding:10px 12px;border-bottom:2px solid transparent;white-space:nowrap;cursor:pointer;transition:.15s;flex-shrink:0;background:none;border-left:none;border-right:none;border-top:none}
+.nav-tab.active{color:#fff;border-bottom-color:#60a5fa}
+/* Page */
+.page{display:none;padding:16px;max-width:600px;margin:0 auto}
+.page.active{display:block}
+/* Card */
+.card{background:#fff;border-radius:var(--radius-lg);border:0.5px solid var(--gray-border);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.card-title svg{width:14px;height:14px;opacity:.7}
+/* Form elements */
+label{display:block;font-size:12px;font-weight:500;color:var(--text3);margin-bottom:4px;margin-top:10px}
+label:first-child{margin-top:0}
+input[type=text],input[type=date],select,textarea{width:100%;border:1px solid var(--gray-border);border-radius:var(--radius);padding:9px 12px;font-size:14px;color:var(--text);background:#fff;outline:none;transition:.15s;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(37,99,168,.12)}
+textarea{resize:vertical;min-height:70px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+/* Valve type checkboxes */
+.vtype-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.vtype-btn{padding:6px 12px;border:1px solid var(--gray-border);border-radius:20px;font-size:12px;cursor:pointer;background:#fff;color:var(--text2);transition:.15s}
+.vtype-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+/* Checklist section */
+.check-section{border:1px solid var(--gray-border);border-radius:var(--radius);overflow:hidden;margin-bottom:10px}
+.check-section-header{background:var(--blue);color:#fff;font-size:12px;font-weight:600;padding:8px 12px;display:flex;align-items:center;gap:6px}
+.check-section-header.trim{background:#374151}
+.check-row{padding:10px 12px;border-bottom:0.5px solid var(--gray-border);background:#fff}
+.check-row:last-child{border-bottom:none}
+.check-label{font-size:13px;font-weight:500;color:var(--text);margin-bottom:8px}
+.check-options{display:flex;flex-wrap:wrap;gap:6px}
+.check-opt{display:flex;align-items:center;gap:5px;cursor:pointer}
+.check-opt input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}
+.check-opt span{font-size:12px;color:var(--text2)}
+.check-comment{margin-top:8px}
+.check-comment input{font-size:12px;padding:6px 10px}
+/* Status row */
+.status-row{display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;background:var(--amber-light);border-bottom:0.5px solid var(--gray-border);align-items:center}
+.status-label{font-size:12px;font-weight:600;color:var(--amber);margin-right:4px}
+/* Photo zone */
+.photo-zone{border:1.5px dashed var(--gray-border);border-radius:var(--radius);padding:16px;text-align:center;cursor:pointer;transition:.15s;background:#fafafa;margin-top:8px;position:relative}
+.photo-zone:hover{border-color:var(--blue2);background:var(--blue-light)}
+.photo-zone p{font-size:12px;color:var(--text3);margin-top:6px}
+.photo-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-thumb .del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+/* PDF scan zone */
+.pdf-zone{border:1.5px dashed #93c5fd;border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;background:#eff6ff;position:relative;margin-top:8px}
+.pdf-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.pdf-zone p{font-size:12px;color:#2563a8}
+.pdf-list{margin-top:8px}
+.pdf-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fff;border:0.5px solid #bfdbfe;border-radius:6px;margin-bottom:6px}
+.pdf-item span{flex:1;font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pdf-item button{background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:2px}
+/* Spare parts table */
+.sp-table{width:100%;border-collapse:collapse;margin-top:8px}
+.sp-table th{background:var(--gray-light);font-size:11px;font-weight:600;padding:7px 8px;text-align:left;color:var(--text3);border-bottom:1px solid var(--gray-border)}
+.sp-table td{padding:6px 4px;border-bottom:0.5px solid var(--gray-border);vertical-align:top}
+.sp-table td input{border:none;border-bottom:1px solid transparent;padding:3px 4px;font-size:12px;width:100%;border-radius:0;background:transparent}
+.sp-table td input:focus{border-bottom-color:var(--blue2);outline:none;background:#f0f6ff}
+.sp-table tr:last-child td{border-bottom:none}
+.sp-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:0 4px}
+.add-btn{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--blue2);background:none;border:1px solid var(--blue2);border-radius:var(--radius);padding:8px 14px;cursor:pointer;margin-top:8px;font-weight:500;width:100%;justify-content:center;transition:.15s}
+.add-btn:hover{background:var(--blue-light)}
+/* Signataires */
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* Buttons bar */
+.btn-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--gray-border);padding:12px 16px;display:flex;gap:10px;z-index:50}
+.btn{flex:1;padding:12px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#1e4a7a}
+.btn-secondary{background:var(--gray-light);color:var(--text2);border:1px solid var(--gray-border)}
+.btn-secondary:hover{background:#e5e7eb}
+.btn-success{background:var(--green);color:#fff}
+.btn-success:hover{background:#15803d}
+/* Badge */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-ok{background:var(--green-light);color:#15803d}
+.badge-nok{background:var(--red-light);color:var(--red)}
+.badge-warn{background:var(--amber-light);color:var(--amber)}
+/* Toast */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1f2937;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:.3s;z-index:999;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* Intervention row for trim */
+.int-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.int-col label{margin-top:0;font-size:11px}
+/* Section divider */
+.sdiv{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:8px 0 4px;border-bottom:1px solid var(--gray-border);margin-bottom:8px}
+/* Info row */
+.info-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.info-pill{background:var(--blue-light);color:var(--blue);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500}
+/* Responsive */
+@media(max-width:380px){.row2{grid-template-columns:1fr}.row3{grid-template-columns:1fr 1fr}.sig-grid{grid-template-columns:1fr}}
+/* Print */
+@media print{.nav-tabs,.btn-bar,.app-header{display:none}.page{display:block!important;padding:8px}}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div style="width:28px;height:28px;background:rgba(255,255,255,.15);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M7 9h10M7 13h6"/></svg>
+  </div>
+  <h1>Equipment Report</h1>
+  <span class="tag" id="hdr-tag">New</span>
+</div>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="goPage(0)">Header</button>
+  <button class="nav-tab" onclick="goPage(1)">Actuator</button>
+  <button class="nav-tab" onclick="goPage(2)">Trim & Body</button>
+  <button class="nav-tab" onclick="goPage(3)">Spare Parts</button>
+  <button class="nav-tab" onclick="goPage(4)">Docs & Photos</button>
+  <button class="nav-tab" onclick="goPage(5)">Signatures</button>
+</div>
+
+<!-- PAGE 0: HEADER -->
+<div class="page active" id="p0">
+  <div class="card">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Equipment Identification
+    </div>
+    <label>Client</label>
+    <input type="text" id="client" value="TEPA" placeholder="Client name">
+    <div class="row2">
+      <div>
+        <label>Work Order (TEPA)</label>
+        <input type="text" id="wo" placeholder="OW-24-003-0169">
+      </div>
+      <div>
+        <label>Item / S-No</label>
+        <input type="text" id="item" placeholder="S-5399">
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Serial Number</label>
+        <input type="text" id="serial" placeholder="F-22-000347">
+      </div>
+      <div>
+        <label>Date</label>
+        <input type="date" id="rdate" value="">
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>PO / DO / CTR</label>
+        <input type="text" id="po" placeholder="">
+      </div>
+      <div>
+        <label>Mat. Code / Tag</label>
+        <input type="text" id="matcode" placeholder="1372271 41 LV 1 3508">
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Size & Rating</label>
+        <input type="text" id="size" placeholder='8" / 300#'>
+      </div>
+      <div>
+        <label>Flange</label>
+        <input type="text" id="flange" placeholder="RF FB">
+      </div>
+    </div>
+    <label>Other Info (Site / PMT)</label>
+    <input type="text" id="otherinfo" placeholder="Sonils x PMT: 039-2024">
+    <label>More Description</label>
+    <input type="text" id="desc" placeholder="CONTROL VALVE 8&quot; 300# RF FB WITH ACTUATOR (MASONEILAN)">
+  </div>
+
+  <div class="card">
+    <div class="card-title">Valve Type</div>
+    <div class="vtype-grid" id="vtype-grid">
+      <button class="vtype-btn" onclick="toggleVType(this)">Ball</button>
+      <button class="vtype-btn active" onclick="toggleVType(this)">Globe</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Gate</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Plug</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Butterfly</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Check</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Diaphragm</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Control</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Choke</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Hydrant</button>
+    </div>
+    <label style="margin-top:10px">Other valve type</label>
+    <input type="text" id="vtype-other" placeholder="Specify if not listed...">
+  </div>
+</div>
+
+<!-- PAGE 1: ACTUATOR -->
+<div class="page" id="p1">
+  <div class="check-section">
+    <div class="check-section-header">Actuator Expertise</div>
+    <div class="check-row">
+      <div class="row2">
+        <div>
+          <label style="margin-top:0">Actuator Type</label>
+          <select id="act-type">
+            <option>Pneumatic</option>
+            <option>Hydraulic</option>
+            <option>Electric</option>
+            <option>GearBox</option>
+            <option>Handle</option>
+            <option>Bare Stem</option>
+          </select>
+        </div>
+        <div>
+          <label style="margin-top:0">Manufacturer</label>
+          <input type="text" id="act-mfr" placeholder="MASONEILAN">
+        </div>
+      </div>
+      <div class="row2" style="margin-top:8px">
+        <div>
+          <label>Model</label>
+          <input type="text" id="act-model" placeholder="84-41395">
+        </div>
+        <div>
+          <label>Serial Number</label>
+          <input type="text" id="act-serial" placeholder="F-22-000347">
+        </div>
+      </div>
+    </div>
+
+    <div class="status-row">
+      <span class="status-label">Status:</span>
+      <label class="check-opt"><input type="checkbox" id="st-conform" checked><span>Conform/Boa</span></label>
+      <label class="check-opt"><input type="checkbox" id="st-leak"><span>Leak/Fuga</span></label>
+      <label class="check-opt"><input type="checkbox" id="st-stuck"><span>Stuck/Presa</span></label>
+    </div>
+    <div class="check-row">
+      <label style="margin-top:0">Comments</label>
+      <textarea id="act-comment" placeholder="Ex: Actuator has been tested, no leakage found."></textarea>
+    </div>
+  </div>
+
+  <div class="check-section">
+    <div class="check-section-header">Actuator Components</div>
+    <div id="act-components"></div>
+  </div>
+</div>
+
+<!-- PAGE 2: TRIM & BODY -->
+<div class="page" id="p2">
+  <div class="check-section">
+    <div class="check-section-header trim">Valve Components — Trim & Body</div>
+    <div id="trim-components"></div>
+  </div>
+</div>
+
+<!-- PAGE 3: SPARE PARTS -->
+<div class="page" id="p3">
+  <div class="card">
+    <div class="card-title">Parts to Machine / Laping / Refill</div>
+    <textarea id="parts-machine" placeholder="N/A or describe..."></textarea>
+  </div>
+  <div class="card">
+    <div class="card-title">Spare Parts Required</div>
+    <div style="overflow-x:auto">
+      <table class="sp-table" id="sp-table">
+        <thead>
+          <tr>
+            <th style="width:36px">#</th>
+            <th style="min-width:60px">Pos.</th>
+            <th style="min-width:160px">Description</th>
+            <th style="min-width:40px">Qty</th>
+            <th style="min-width:100px">SAP Art.</th>
+            <th style="min-width:60px">Stock</th>
+            <th style="width:28px"></th>
+          </tr>
+        </thead>
+        <tbody id="sp-body"></tbody>
+      </table>
+    </div>
+    <button class="add-btn" onclick="addSpare()">+ Add Spare Part</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Valve Drawing Reference</div>
+    <div class="row2">
+      <div>
+        <label>Drawing Ref.</label>
+        <input type="text" id="drawing-ref" placeholder="2829432">
+      </div>
+      <div>
+        <label>Manufacturer</label>
+        <input type="text" id="drawing-mfr" placeholder="MASONEILAN">
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Comments Inspection</div>
+    <textarea id="comment-inspection" placeholder="Ex: Valve was dirty."></textarea>
+  </div>
+</div>
+
+<!-- PAGE 4: DOCS & PHOTOS -->
+<div class="page" id="p4">
+  <div class="card">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Scan PDF (Plan, Drawing)
+    </div>
+    <div class="pdf-zone">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2" width="28" height="28"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+      <p>Tap to scan or upload PDF drawing</p>
+      <input type="file" accept=".pdf,application/pdf" multiple onchange="addPdfs(this)">
+    </div>
+    <div class="pdf-list" id="pdf-list"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Photos
+    </div>
+    <div class="photo-zone">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" width="28" height="28"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <p>Camera / Gallery — tap to add photos</p>
+      <input type="file" accept="image/*" multiple capture="environment" onchange="addPhotos(this)">
+    </div>
+    <div class="photo-grid" id="photo-grid"></div>
+    <div id="photo-captions" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- PAGE 5: SIGNATURES -->
+<div class="page" id="p5">
+  <div class="card">
+    <div class="card-title">Personnel</div>
+    <div class="sig-grid">
+      <div>
+        <label>Work Prep.</label>
+        <input type="text" id="sig-workprep" placeholder="Name">
+      </div>
+      <div>
+        <label>Technical Supervisor</label>
+        <input type="text" id="sig-supervisor" placeholder="Name">
+      </div>
+    </div>
+    <label>Technical Support</label>
+    <input type="text" id="sig-support1" placeholder="Name 1">
+    <input type="text" id="sig-support2" placeholder="Name 2" style="margin-top:6px">
+  </div>
+  <div class="card">
+    <div class="card-title">Report Summary</div>
+    <div id="summary-block" style="font-size:13px;line-height:1.8;color:var(--text2)">
+      Fill in the report then check summary here.
+    </div>
+    <button class="add-btn" style="margin-top:12px" onclick="buildSummary()">🔄 Refresh Summary</button>
+  </div>
+  <div class="card" style="background:var(--blue-light);border-color:#bfdbfe">
+    <div class="card-title" style="color:var(--blue)">Save Draft</div>
+    <p style="font-size:12px;color:#2563a8;margin-bottom:10px">Draft auto-saved locally. Recover after closing the app.</p>
+    <button class="btn btn-primary" style="width:100%" onclick="saveDraft()">💾 Save Draft</button>
+  </div>
+</div>
+
+<!-- BOTTOM ACTION BAR -->
+<div class="btn-bar">
+  <button class="btn btn-secondary" onclick="exportDocx()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    DOCX
+  </button>
+  <button class="btn btn-success" onclick="exportPdf()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    PDF
+  </button>
+  <button class="btn btn-primary" onclick="shareReport()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    Share
+  </button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// DATA MODEL
+// ═══════════════════════════════════════════
+const ACT_COMPONENTS = [
+  {id:'spring', label:'Spring Cartridge', label_pt:'Cartucho de mola'},
+  {id:'cylinder', label:'Cylinder Box', label_pt:'Cylindro'},
+  {id:'tierod', label:'Tie Rod', label_pt:'Pernos'},
+  {id:'gear', label:'Gear', label_pt:'Engrenagem'},
+  {id:'yoke', label:'Yoke', label_pt:'Cabeçote'},
+  {id:'diaphragm', label:'Diaphragm', label_pt:'Diafragma', noLeak:true},
+];
+const TRIM_COMPONENTS = [
+  {id:'body', label:'Body', label_pt:'Corpo'},
+  {id:'ball', label:'Ball / Wedge / Disc / Plug', label_pt:'Ball / Cunhas / Disco'},
+  {id:'seatA', label:'Seat Ring A', label_pt:'Sede A'},
+  {id:'seatB', label:'Seat Ring B / Cage', label_pt:'Sede B / Gaiola'},
+  {id:'upperbox', label:'Upper Box / Packing Gland', label_pt:'Caixa superior/Glândula'},
+  {id:'stem', label:'Upper Stem & Low Stem', label_pt:'Haste inferior & Superior'},
+];
+const COND_OPTIONS = ['Good/Boa','Scratches/Arranhões','Craks/Rachaduras','Corroded/Corroída','Damage/Danificado'];
+const INT_OPTIONS = ['Reuse/Reutilização','Reparation/Reparação','Machinning/Usinagem','Replace/Substituir','inspection/inspecção'];
+const DIAP_OPTIONS = ['Good/Boa','Leakage/Fuga'];
+
+let photos = []; // {dataUrl, caption}
+let pdfFiles = []; // {name, dataUrl}
+let spareRows = [];
+
+// ═══════════════════════════════════════════
+// BUILD ACTUATOR CHECKLIST
+// ═══════════════════════════════════════════
+function buildActuator(){
+  const c = document.getElementById('act-components');
+  c.innerHTML = ACT_COMPONENTS.map(comp => {
+    const opts = comp.noLeak ? DIAP_OPTIONS : ['Good/Boa','Corroded/Corroída','Damage/Danificado'];
+    const checks = opts.map(o => `<label class="check-opt"><input type="checkbox" id="act_${comp.id}_${o.split('/')[0]}" ${o==='Good/Boa'?'checked':''}><span>${o}</span></label>`).join('');
+    return `<div class="check-row">
+      <div class="check-label">${comp.label} <span style="color:var(--text3);font-size:11px;font-weight:400">(${comp.label_pt})</span></div>
+      <div class="check-options">${checks}</div>
+      <div class="check-comment"><input type="text" id="act_${comp.id}_comment" placeholder="Comment..."></div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// BUILD TRIM CHECKLIST
+// ═══════════════════════════════════════════
+function buildTrim(){
+  const c = document.getElementById('trim-components');
+  c.innerHTML = TRIM_COMPONENTS.map(comp => {
+    const condChecks = COND_OPTIONS.map(o => `<label class="check-opt"><input type="checkbox" id="trim_${comp.id}_cond_${o.split('/')[0]}" ${o==='Good/Boa'?'checked':''}><span style="font-size:11px">${o}</span></label>`).join('');
+    const intChecks = INT_OPTIONS.map(o => `<label class="check-opt"><input type="checkbox" id="trim_${comp.id}_int_${o.split('/')[0]}" ${o==='Reuse/Reutilização'?'checked':''}><span style="font-size:11px">${o}</span></label>`).join('');
+    return `<div class="check-row">
+      <div class="check-label">${comp.label} <span style="color:var(--text3);font-size:11px;font-weight:400">(${comp.label_pt})</span></div>
+      <div class="int-row">
+        <div>
+          <div class="sdiv">Condition</div>
+          <div class="check-options" style="flex-direction:column;gap:4px">${condChecks}</div>
+        </div>
+        <div>
+          <div class="sdiv">Intervention done</div>
+          <div class="check-options" style="flex-direction:column;gap:4px">${intChecks}</div>
+        </div>
+      </div>
+      <div class="check-comment" style="margin-top:8px">
+        <input type="text" id="trim_${comp.id}_pictures" placeholder="Refer to picture...">
+        <input type="text" id="trim_${comp.id}_comment" placeholder="Comments..." style="margin-top:4px">
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// PHOTOS
+// ═══════════════════════════════════════════
+function addPhotos(input){
+  const files = Array.from(input.files);
+  files.forEach(f => {
+    const r = new FileReader();
+    r.onload = e => {
+      photos.push({dataUrl: e.target.result, caption:`Picture ${photos.length+1}`});
+      renderPhotos();
+    };
+    r.readAsDataURL(f);
+  });
+  input.value = '';
+}
+function renderPhotos(){
+  const grid = document.getElementById('photo-grid');
+  const caps = document.getElementById('photo-captions');
+  grid.innerHTML = photos.map((p,i) => `
+    <div class="photo-thumb">
+      <img src="${p.dataUrl}" alt="photo ${i+1}">
+      <button class="del" onclick="delPhoto(${i})">×</button>
+    </div>`).join('');
+  caps.innerHTML = photos.map((p,i) => `
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+      <span style="font-size:12px;color:var(--text3);min-width:60px">Pic ${i+1}</span>
+      <input type="text" value="${p.caption}" onchange="photos[${i}].caption=this.value" style="font-size:12px;padding:5px 8px">
+    </div>`).join('');
+}
+function delPhoto(i){photos.splice(i,1);renderPhotos();}
+
+// ═══════════════════════════════════════════
+// PDF SCANS
+// ═══════════════════════════════════════════
+function addPdfs(input){
+  Array.from(input.files).forEach(f => {
+    const r = new FileReader();
+    r.onload = e => {pdfFiles.push({name:f.name,dataUrl:e.target.result});renderPdfs();}
+    r.readAsDataURL(f);
+  });
+  input.value = '';
+}
+function renderPdfs(){
+  const list = document.getElementById('pdf-list');
+  list.innerHTML = pdfFiles.map((p,i) => `
+    <div class="pdf-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>${p.name}</span>
+      <button onclick="delPdf(${i})">🗑</button>
+    </div>`).join('');
+}
+function delPdf(i){pdfFiles.splice(i,1);renderPdfs();}
+
+// ═══════════════════════════════════════════
+// SPARE PARTS
+// ═══════════════════════════════════════════
+let spareId = 0;
+function addSpare(pos='',desc='',qty='1',sap='',stock=''){
+  const id = spareId++;
+  spareRows.push({id, pos, desc, qty, sap, stock});
+  renderSpares();
+}
+function renderSpares(){
+  const tb = document.getElementById('sp-body');
+  tb.innerHTML = spareRows.map((r,i) => `
+    <tr>
+      <td style="color:var(--text3);font-size:11px;text-align:center;padding:6px 4px">${i+1}</td>
+      <td><input type="text" value="${r.pos}" onchange="spareRows[${i}].pos=this.value" placeholder="B010"></td>
+      <td><input type="text" value="${r.desc}" onchange="spareRows[${i}].desc=this.value" placeholder="BODY GASKET - AISI316..."></td>
+      <td><input type="text" value="${r.qty}" onchange="spareRows[${i}].qty=this.value" placeholder="1"></td>
+      <td><input type="text" value="${r.sap}" onchange="spareRows[${i}].sap=this.value" placeholder="Art No."></td>
+      <td><input type="text" value="${r.stock}" onchange="spareRows[${i}].stock=this.value" placeholder="AO61"></td>
+      <td><button class="sp-del" onclick="delSpare(${i})">×</button></td>
+    </tr>`).join('');
+}
+function delSpare(i){spareRows.splice(i,1);renderSpares();}
+
+// ═══════════════════════════════════════════
+// VALVE TYPE TOGGLE
+// ═══════════════════════════════════════════
+function toggleVType(btn){btn.classList.toggle('active');}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function goPage(n){
+  document.querySelectorAll('.page').forEach((p,i)=>{p.classList.toggle('active',i===n);});
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>{t.classList.toggle('active',i===n);});
+  updateHeader();
+}
+function updateHeader(){
+  const tag = document.getElementById('hdr-tag');
+  const wo = document.getElementById('wo').value;
+  const item = document.getElementById('item').value;
+  tag.textContent = (wo||item) ? `${wo} / ${item}` : 'New';
+}
+['wo','item'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('input',updateHeader);
+});
+
+// ═══════════════════════════════════════════
+// SUMMARY
+// ═══════════════════════════════════════════
+function buildSummary(){
+  const get = id => (document.getElementById(id)||{}).value||'—';
+  const vtypes = [...document.querySelectorAll('.vtype-btn.active')].map(b=>b.textContent).join(', ');
+  const nok = TRIM_COMPONENTS.filter(c=>{
+    const d = document.getElementById(`trim_${c.id}_cond_Damage`);
+    const cor = document.getElementById(`trim_${c.id}_cond_Corroded`);
+    return (d&&d.checked)||(cor&&cor.checked);
+  }).map(c=>c.label);
+  const spCount = spareRows.length;
+  document.getElementById('summary-block').innerHTML = `
+    <b>Client:</b> ${get('client')} &nbsp;|&nbsp; <b>WO:</b> ${get('wo')} &nbsp;|&nbsp; <b>Item:</b> ${get('item')}<br>
+    <b>Tag:</b> ${get('matcode')} &nbsp;|&nbsp; <b>Date:</b> ${get('rdate')}<br>
+    <b>Valve:</b> ${vtypes||'—'} ${get('size')} ${get('flange')}<br>
+    <b>NOK components:</b> ${nok.length?nok.join(', '):'None'}<br>
+    <b>Spare parts required:</b> ${spCount} item(s)<br>
+    <b>Photos:</b> ${photos.length} &nbsp;|&nbsp; <b>PDFs:</b> ${pdfFiles.length}<br>
+    <b>Work Prep:</b> ${get('sig-workprep')} &nbsp;|&nbsp; <b>Supervisor:</b> ${get('sig-supervisor')}
+  `;
+  toast('Summary refreshed');
+}
+
+// ═══════════════════════════════════════════
+// DRAFT SAVE / LOAD
+// ═══════════════════════════════════════════
+function collectData(){
+  const get = id => (document.getElementById(id)||{}).value||'';
+  const chk = id => !!(document.getElementById(id)||{}).checked;
+  return {
+    client:get('client'),wo:get('wo'),item:get('item'),serial:get('serial'),
+    rdate:get('rdate'),po:get('po'),matcode:get('matcode'),size:get('size'),
+    flange:get('flange'),otherinfo:get('otherinfo'),desc:get('desc'),
+    vtypes:[...document.querySelectorAll('.vtype-btn.active')].map(b=>b.textContent),
+    vtypeOther:get('vtype-other'),
+    actType:get('act-type'),actMfr:get('act-mfr'),actModel:get('act-model'),actSerial:get('act-serial'),
+    stConform:chk('st-conform'),stLeak:chk('st-leak'),stStuck:chk('st-stuck'),
+    actComment:get('act-comment'),
+    actComps: ACT_COMPONENTS.map(c=>({
+      id:c.id,
+      states: (c.noLeak?DIAP_OPTIONS:['Good/Boa','Corroded/Corroída','Damage/Danificado']).map(o=>({
+        key:o.split('/')[0], val:chk(`act_${c.id}_${o.split('/')[0]}`)
+      })),
+      comment:get(`act_${c.id}_comment`)
+    })),
+    trimComps: TRIM_COMPONENTS.map(c=>({
+      id:c.id,
+      cond: COND_OPTIONS.map(o=>({key:o.split('/')[0],val:chk(`trim_${c.id}_cond_${o.split('/')[0]}`)})),
+      int: INT_OPTIONS.map(o=>({key:o.split('/')[0],val:chk(`trim_${c.id}_int_${o.split('/')[0]}`)})),
+      pictures:get(`trim_${c.id}_pictures`),
+      comment:get(`trim_${c.id}_comment`)
+    })),
+    spareRows:[...spareRows],
+    partsMachine:get('parts-machine'),
+    drawingRef:get('drawing-ref'),drawingMfr:get('drawing-mfr'),
+    commentInspection:get('comment-inspection'),
+    sigWorkprep:get('sig-workprep'),sigSupervisor:get('sig-supervisor'),
+    sigSupport1:get('sig-support1'),sigSupport2:get('sig-support2'),
+    photos: photos.map(p=>({caption:p.caption, dataUrl:p.dataUrl})),
+    pdfFiles: pdfFiles.map(p=>({name:p.name, dataUrl:p.dataUrl})),
+  };
+}
+
+function saveDraft(){
+  try{localStorage.setItem('eq_report_draft',JSON.stringify(collectData()));toast('Draft saved ✓');}
+  catch(e){toast('Save failed (storage full?)');}
+}
+function loadDraft(){
+  const d = localStorage.getItem('eq_report_draft');
+  if(!d)return;
+  try{applyData(JSON.parse(d));toast('Draft loaded');}catch(e){}
+}
+function applyData(d){
+  const set = (id,v) => {const el=document.getElementById(id);if(el)el.value=v||'';}
+  set('client',d.client);set('wo',d.wo);set('item',d.item);set('serial',d.serial);
+  set('rdate',d.rdate);set('po',d.po);set('matcode',d.matcode);set('size',d.size);
+  set('flange',d.flange);set('otherinfo',d.otherinfo);set('desc',d.desc);
+  set('vtype-other',d.vtypeOther);
+  document.querySelectorAll('.vtype-btn').forEach(b=>{b.classList.toggle('active',(d.vtypes||[]).includes(b.textContent));});
+  set('act-type',d.actType);set('act-mfr',d.actMfr);set('act-model',d.actModel);set('act-serial',d.actSerial);
+  const chk=(id,v)=>{const el=document.getElementById(id);if(el)el.checked=!!v;};
+  chk('st-conform',d.stConform);chk('st-leak',d.stLeak);chk('st-stuck',d.stStuck);
+  set('act-comment',d.actComment);
+  (d.actComps||[]).forEach(c=>{
+    c.states.forEach(s=>chk(`act_${c.id}_${s.key}`,s.val));
+    set(`act_${c.id}_comment`,c.comment);
+  });
+  (d.trimComps||[]).forEach(c=>{
+    c.cond.forEach(s=>chk(`trim_${c.id}_cond_${s.key}`,s.val));
+    c.int.forEach(s=>chk(`trim_${c.id}_int_${s.key}`,s.val));
+    set(`trim_${c.id}_pictures`,c.pictures);
+    set(`trim_${c.id}_comment`,c.comment);
+  });
+  spareRows = d.spareRows||[];spareId=spareRows.length;renderSpares();
+  set('parts-machine',d.partsMachine);set('drawing-ref',d.drawingRef);set('drawing-mfr',d.drawingMfr);
+  set('comment-inspection',d.commentInspection);
+  set('sig-workprep',d.sigWorkprep);set('sig-supervisor',d.sigSupervisor);
+  set('sig-support1',d.sigSupport1);set('sig-support2',d.sigSupport2);
+  photos = d.photos||[];renderPhotos();
+  pdfFiles = d.pdfFiles||[];renderPdfs();
+  updateHeader();
+}
+
+// ═══════════════════════════════════════════
+// EXPORT PDF — LAYOUT PROMETIM FIDÈLE
+// ═══════════════════════════════════════════
+function exportPdf(){
+  const d = collectData();
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210, M=10, RW=W-2*M; // page width, margin, content width
+  let y=10;
+
+  // ── helpers ──
+  const B=[26,58,92],   // bleu foncé header
+        BG=[240,244,248], // gris clair background
+        BL=[0,0,0],
+        GR=[100,100,100],
+        WH=[255,255,255],
+        YL=[255,243,180]; // jaune status
+
+  const setF=(sz,style='normal',col=BL)=>{doc.setFontSize(sz);doc.setFont('helvetica',style);doc.setTextColor(...col);};
+  const rect=(x,yy,w,h,fill,stroke)=>{
+    if(fill){doc.setFillColor(...fill);doc.rect(x,yy,w,h,'F');}
+    if(stroke){doc.setDrawColor(...stroke);doc.rect(x,yy,w,h,'S');}
+  };
+  const cell=(txt,x,yy,w,h,fill,stroke,sz=8,style='normal',col=BL,align='left')=>{
+    if(fill) rect(x,yy,w,h,fill,stroke||[180,180,180]);
+    else if(stroke) rect(x,yy,w,h,null,stroke);
+    setF(sz,style,col);
+    const px = align==='center'?x+w/2 : x+1.5;
+    doc.text(String(txt||''),px,yy+h-1.8,{maxWidth:w-3,align});
+  };
+  const hdrBar=(txt,yy,h=6)=>{
+    rect(M,yy,RW,h,B);
+    setF(8,'bold',WH);
+    doc.text(txt,M+2,yy+h-1.5);
+    return yy+h;
+  };
+  const checkMark=(checked)=>checked?'[X]':'[ ]';
+  const newPageIfNeeded=(need=20)=>{if(y+need>287){doc.addPage();y=10;}};
+
+  // ══════════════════════════════════════
+  // PAGE 1
+  // ══════════════════════════════════════
+
+  // ── LOGO zone + Title ──
+  rect(M,y,RW,12,B);
+  setF(10,'bold',WH);
+  doc.text('EQUIPMENT DISASSEMBLING & ASSEMBLING REPORT',M+2,y+5);
+  setF(7,'italic',[200,210,220]);
+  doc.text('RELATÓRIO DE DESMONTAGEM & MONTAGEM DE EQUIPAMENTO',M+2,y+9.5);
+  // Date top right
+  setF(8,'bold',WH);
+  doc.text('Date/Data:',W-M-38,y+5);
+  setF(8,'normal',WH);
+  doc.text(d.rdate||'',W-M-20,y+5);
+  y+=12;
+
+  // ── Header info table ──
+  const rowH=6;
+  // Row 1: CLIENT | WORK ORDER | Item
+  rect(M,y,RW,rowH,BG,[180,180,180]);
+  cell('CLIENT:',M,y,22,rowH,null,null,7,'bold',GR);
+  cell(d.client,M+22,y,38,rowH,null,null,8,'normal',BL);
+  rect(M+60,y,0.3,rowH,[180,180,180]);
+  cell('WORK ORDER:',M+62,y,28,rowH,null,null,7,'bold',GR);
+  cell(d.wo,M+90,y,50,rowH,null,null,8,'normal',BL);
+  rect(M+140,y,0.3,rowH,[180,180,180]);
+  cell('Item:',M+142,y,18,rowH,null,null,7,'bold',GR);
+  cell(d.item,M+158,y,32,rowH,null,null,8,'normal',BL);
+  doc.setDrawColor(180,180,180);doc.rect(M,y,RW,rowH,'S');
+  y+=rowH;
+
+  // Row 2: Valve type
+  rect(M,y,RW,rowH,WH,[180,180,180]);
+  cell('Valve type:',M,y,22,rowH,null,null,7,'bold',GR);
+  const allTypes=['Ball','Globe','Gate','Plug','Butterfly','Check','Diaphragm','Control','Choke','Hydrant'];
+  let tx=M+22;
+  allTypes.forEach(t=>{
+    const active=d.vtypes.includes(t);
+    setF(7,active?'bold':'normal',active?B:GR);
+    doc.text((active?'[✓] ':'[ ] ')+t, tx, y+rowH-1.8);
+    tx+=t.length*1.8+8;
+  });
+  y+=rowH;
+
+  // Row 3: Serial | Other | PO/DO/CTR
+  rect(M,y,RW,rowH,BG,[180,180,180]);
+  cell('Serial Number:',M,y,28,rowH,null,null,7,'bold',GR);
+  cell(d.serial,M+28,y,32,rowH,null,null,8,'normal',BL);
+  cell('Other:',M+60,y,14,rowH,null,null,7,'bold',GR);
+  cell(d.matcode,M+74,y,36,rowH,null,null,7,'normal',BL);
+  cell('PO / DO / CTR:',M+110,y,26,rowH,null,null,7,'bold',GR);
+  cell(d.po,M+136,y,54,rowH,null,null,7,'normal',BL);
+  y+=rowH;
+
+  // Row 4: Size | Flange | Mat Code
+  rect(M,y,RW,rowH,WH,[180,180,180]);
+  cell('Size & Rating:',M,y,28,rowH,null,null,7,'bold',GR);
+  cell(d.size,M+28,y,32,rowH,null,null,8,'normal',BL);
+  cell('Flange:',M+60,y,14,rowH,null,null,7,'bold',GR);
+  cell(d.flange,M+74,y,36,rowH,null,null,8,'normal',BL);
+  cell('Mat. Code:',M+110,y,22,rowH,null,null,7,'bold',GR);
+  cell(d.matcode,M+132,y,58,rowH,null,null,7,'normal',BL);
+  y+=rowH;
+
+  // Row 5: Other info
+  rect(M,y,RW,rowH,BG,[180,180,180]);
+  cell('Other Info:',M,y,22,rowH,null,null,7,'bold',GR);
+  cell(d.otherinfo,M+22,y,RW-22,rowH,null,null,7,'normal',BL);
+  y+=rowH;
+
+  // Row 6: More description
+  rect(M,y,RW,rowH+1,[240,248,255],[180,180,180]);
+  cell('More Description:',M,y,30,rowH+1,null,null,7,'bold',GR);
+  cell(d.desc,M+30,y,RW-30,rowH+1,null,null,7,'normal',BL);
+  y+=rowH+2;
+
+  // ══════════════════════════════════════
+  // ACTUATOR EXPERTISE
+  // ══════════════════════════════════════
+  y = hdrBar('ACTUATOR EXPERTISE',y,7)+1;
+
+  // Left col: type/model/serial | Right col: component checklist
+  const aLx=M, aRx=M+90, aW=88, aH=5.5;
+
+  // Type row
+  rect(aLx,y,88,aH,BG,[180,180,180]);
+  cell(d.actType||'Pneumatic',aLx,y,20,aH,null,null,7,'bold',B);
+  cell('ACT.',aLx+20,y,15,aH,null,null,7,'normal',BL);
+  // right: Spring Cartridge
+  const sc=d.actComps.find(x=>x.id==='spring');
+  const scOn=sc?sc.states.filter(s=>s.val).map(s=>s.key):[];
+  rect(aRx,y,RW-88,aH,BG,[180,180,180]);
+  cell('Spring Cartridge (Cartucho de mola)',aRx,y,60,aH,null,null,6,'normal',GR);
+  cell(checkMark(scOn.includes('Good')),aRx+60,y,12,aH,null,null,7,'normal',scOn.includes('Good')?B:BL);
+  cell(checkMark(scOn.includes('Corroded')),aRx+72,y,14,aH,null,null,7,'normal',BL);
+  cell(checkMark(scOn.includes('Damage')),aRx+86,y,14,aH,null,null,7,'normal',BL);
+  y+=aH;
+
+  // labels row
+  rect(aRx+60,y,14,4,null,[180,180,180]);
+  rect(aRx+74,y,14,4,null,[180,180,180]);
+  rect(aRx+88,y,12,4,null,[180,180,180]);
+  setF(6,'normal',GR);
+  doc.text('Good',aRx+61,y+3);doc.text('Corroded',aRx+75,y+3);doc.text('Damage',aRx+89,y+3);
+
+  // Hydraulic / Cylinder Box
+  const actRows=[
+    {leftL:'Hydraulic',leftV:`Model: ${d.actModel||''}`,compId:'cylinder',compL:'Cylinder Box (Cylindro)'},
+    {leftL:'Electric',leftV:`Mfr: ${d.actMfr||''}`,compId:'tierod',compL:'Tie Rod (Pernos)'},
+    {leftL:'GearBox',leftV:`S/N: ${d.actSerial||''}`,compId:'gear',compL:'Gear (Engrenagem)'},
+    {leftL:'Handle',leftV:'',compId:'yoke',compL:'Yoke (Cabeçote)'},
+    {leftL:'Bare Stem',leftV:'',compId:'diaphragm',compL:'Diaphragm (Diafragma)',isDiap:true},
+  ];
+  y+=4;
+  actRows.forEach(r=>{
+    rect(aLx,y,88,aH,WH,[180,180,180]);
+    cell(r.leftL,aLx,y,22,aH,null,null,7,'bold',GR);
+    cell(r.leftV,aLx+22,y,66,aH,null,null,7,'normal',BL);
+    const cp=d.actComps.find(x=>x.id===r.compId);
+    const cpOn=cp?cp.states.filter(s=>s.val).map(s=>s.key):[];
+    rect(aRx,y,RW-88,aH,WH,[180,180,180]);
+    cell(r.compL,aRx,y,60,aH,null,null,6,'normal',GR);
+    if(r.isDiap){
+      cell(checkMark(cpOn.includes('Good')),aRx+60,y,22,aH,null,null,7,'normal',cpOn.includes('Good')?B:BL);
+      cell(checkMark(cpOn.includes('Leakage')),aRx+82,y,18,aH,null,null,7,'normal',BL);
+    } else {
+      cell(checkMark(cpOn.includes('Good')),aRx+60,y,14,aH,null,null,7,'normal',cpOn.includes('Good')?B:BL);
+      cell(checkMark(cpOn.includes('Corroded')),aRx+74,y,14,aH,null,null,7,'normal',BL);
+      cell(checkMark(cpOn.includes('Damage')),aRx+88,y,12,aH,null,null,7,'normal',BL);
+    }
+    y+=aH;
+  });
+
+  // Status bar
+  const stH=6;
+  rect(M,y,RW,stH,YL,[180,180,180]);
+  setF(7,'bold',[100,70,0]);doc.text('Status :',M+1,y+4);
+  setF(7,'normal',BL);
+  doc.text(checkMark(d.stConform)+' Conform/Boa',M+20,y+4);
+  doc.text(checkMark(d.stLeak)+' Leak/Fuga',M+60,y+4);
+  doc.text(checkMark(d.stStuck)+' Stuck/Presa',M+95,y+4);
+  y+=stH;
+
+  // Comments actuator
+  const comH=7;
+  rect(M,y,RW,comH,WH,[180,180,180]);
+  setF(7,'bold',GR);doc.text('COMMENTS:',M+1,y+4);
+  setF(7,'normal',BL);doc.text(d.actComment||'',M+22,y+4,{maxWidth:RW-24});
+  y+=comH+1;
+
+  // ══════════════════════════════════════
+  // VALVE COMPONENTS TRIM & BODY
+  // ══════════════════════════════════════
+  newPageIfNeeded(80);
+  y = hdrBar('VALVE COMPONENTS TRIM & BODY  (Componentes & corpo)',y,7)+1;
+
+  // Column headers
+  const c1=M, c2=M+38, c3=M+88, c4=M+128, hRow=5;
+  rect(c1,y,38,hRow,B);rect(c2,y,50,hRow,B);rect(c3,y,40,hRow,B);rect(c4,y,RW-128,hRow,B);
+  setF(7,'bold',WH);
+  doc.text('Component',c1+1,y+3.5);
+  doc.text('Intervention done / Intervenção realizada',c2+1,y+3.5);
+  doc.text('Pictures (Fotos)',c3+1,y+3.5);
+  doc.text('Comments (Comentários)',c4+1,y+3.5);
+  y+=hRow;
+
+  TRIM_COMPONENTS.forEach((comp,idx)=>{
+    const tc=d.trimComps.find(x=>x.id===comp.id);
+    const condOn=(tc?.cond||[]).filter(s=>s.val).map(s=>s.key);
+    const intOn=(tc?.int||[]).filter(s=>s.val).map(s=>s.key);
+    const rowBg=idx%2===0?[248,250,252]:[255,255,255];
+    const rH=18;
+    newPageIfNeeded(rH+2);
+
+    // Component name cell (dark header)
+    rect(c1,y,38,6,[55,65,81]);
+    setF(7,'bold',WH);
+    doc.text(comp.label,c1+1,y+4.2);
+    rect(c1,y+6,38,rH-6,rowBg,[180,180,180]);
+    setF(6,'normal',GR);
+    doc.text(comp.label_pt,c1+1,y+9);
+    // Condition checkboxes
+    let cy2=y+13;
+    COND_OPTIONS.forEach(o=>{
+      const k=o.split('/')[0];
+      const on=condOn.includes(k);
+      setF(6,on?'bold':'normal',on?B:GR);
+      doc.text(checkMark(on)+' '+o,c1+1,cy2);
+      cy2+=3.2;
+    });
+
+    // Intervention done cell
+    rect(c2,y,50,6,[55,65,81]);
+    setF(7,'italic',WH);doc.text('Intervention done',c2+1,y+4.2);
+    rect(c2,y+6,50,rH-6,rowBg,[180,180,180]);
+    let iy=y+10;
+    INT_OPTIONS.forEach(o=>{
+      const k=o.split('/')[0];
+      const on=intOn.includes(k);
+      setF(6,on?'bold':'normal',on?B:GR);
+      doc.text(checkMark(on)+' '+o,c2+1,iy);
+      iy+=3.2;
+    });
+
+    // Pictures cell
+    rect(c3,y,40,rH,rowBg,[180,180,180]);
+    setF(7,'normal',BL);
+    doc.text(tc?.pictures||'',c3+1,y+6,{maxWidth:38});
+
+    // Comments cell
+    rect(c4,y,RW-128,rH,rowBg,[180,180,180]);
+    setF(7,'normal',BL);
+    doc.text(tc?.comment||'',c4+1,y+6,{maxWidth:RW-130});
+
+    y+=rH+1;
+  });
+
+  // ══════════════════════════════════════
+  // PAGE 2 — SPARE PARTS
+  // ══════════════════════════════════════
+  doc.addPage(); y=10;
+
+  // Parts to machine
+  y=hdrBar('PARTS TO BE MACHINED/LAPING/REFILLED  (PEÇAS A SEREM USINADAS/LAPIDADAS/ENCHIMENTO)',y,6)+1;
+  rect(M,y,RW,8,WH,[180,180,180]);
+  setF(7,'bold',GR);doc.text('Work description:',M+1,y+3);
+  setF(7,'normal',BL);doc.text(d.partsMachine||'N/A',M+30,y+3,{maxWidth:RW-32});
+  y+=10;
+
+  // Comments inspection
+  y=hdrBar('COMMENTS INSPECTION  (COMENTÁRIO INSPECÇÃO)',y,6)+1;
+  const ciH=Math.max(12, d.commentInspection?16:12);
+  rect(M,y,RW,ciH,WH,[180,180,180]);
+  setF(7,'normal',BL);doc.text(d.commentInspection||'',M+2,y+4,{maxWidth:RW-4});
+  y+=ciH+3;
+
+  // Spare parts table
+  y=hdrBar('SPARE PARTS REQUIRED  (PEÇAS SOBRESSELENTES NECESSÁRIAS)',y,6)+1;
+  const spCols=[M,M+14,M+60,M+110,M+138,M+162];
+  const spWidths=[14,46,50,28,24,28];
+  const spHdrs=['Pos.','Description / Designation','Qty','SAP Article','Stock','Obs.'];
+  const thH=5;
+  spHdrs.forEach((h,i)=>{
+    rect(spCols[i],y,spWidths[i],thH,B,[180,180,180]);
+    setF(6.5,'bold',WH);doc.text(h,spCols[i]+1,y+3.5);
+  });
+  y+=thH;
+  d.spareRows.forEach((r,i)=>{
+    const rh=5.5;
+    newPageIfNeeded(rh+2);
+    const bg=i%2===0?WH:BG;
+    spWidths.forEach((w,ci)=>rect(spCols[ci],y,w,rh,bg,[180,180,180]));
+    setF(7,'normal',BL);
+    doc.text(r.pos||'',spCols[0]+1,y+3.8);
+    doc.text((r.desc||'').substring(0,45),spCols[1]+1,y+3.8);
+    doc.text(r.qty||'',spCols[2]+1,y+3.8);
+    doc.text(r.sap||'',spCols[3]+1,y+3.8);
+    doc.text(r.stock||'',spCols[4]+1,y+3.8);
+    y+=rh;
+  });
+  y+=4;
+
+  // Drawing reference
+  newPageIfNeeded(14);
+  rect(M,y,RW,6,BG,[180,180,180]);
+  setF(7,'bold',GR);doc.text('VALVE DRAWING Reference',M+1,y+4);
+  setF(8,'bold',B);doc.text(`${d.drawingRef||''}  –  ${d.drawingMfr||''}`,M+50,y+4);
+  y+=8;
+
+  // Signataires table
+  newPageIfNeeded(20);
+  const sigCols=[M,M+60,M+120];
+  const sigW=58;const sigH=8;
+  // headers
+  ['WORK PREP.','TECHNICAL SUPERVISOR','TECHNICAL SUPPORT'].forEach((h,i)=>{
+    rect(sigCols[i],y,sigW,sigH,B,[180,180,180]);
+    setF(7,'bold',WH);doc.text(h,sigCols[i]+1,y+5);
+  });
+  y+=sigH;
+  // values
+  [d.sigWorkprep, d.sigSupervisor, `${d.sigSupport1||''}${d.sigSupport2?' / '+d.sigSupport2:''}`].forEach((v,i)=>{
+    rect(sigCols[i],y,sigW,10,WH,[180,180,180]);
+    setF(8,'normal',BL);doc.text(v||'',sigCols[i]+2,y+6);
+  });
+  // obs column
+  rect(M+180,y-sigH,20,sigH+10,BG,[180,180,180]);
+  setF(6,'bold',GR);doc.text('Obs.',M+181,y-sigH+4);
+  y+=12;
+
+  // ══════════════════════════════════════
+  // PAGE 3 — PHOTOS
+  // ══════════════════════════════════════
+  if(photos.length>0){
+    doc.addPage();y=10;
+    y=hdrBar('ATTACHMENTS  (ANEXOS)',y,7)+3;
+    const iw=58,ih=46,gap=4;
+    let px=M,col=0;
+    for(let i=0;i<photos.length;i++){
+      try{
+        doc.addImage(photos[i].dataUrl,'JPEG',px,y,iw,ih);
+        rect(px,y+ih,iw,5,[230,235,240],[180,180,180]);
+        setF(6.5,'normal',GR);
+        doc.text(photos[i].caption||`Picture ${i+1} -`,px+1,y+ih+3.5);
+      }catch(e){}
+      col++;px+=iw+gap;
+      if(col===3){col=0;px=M;y+=ih+8;newPageIfNeeded(ih+12);}
+    }
+  }
+
+  // ── Footer toutes les pages ──
+  const pc=doc.getNumberOfPages();
+  for(let i=1;i<=pc;i++){
+    doc.setPage(i);
+    rect(0,289,W,8,[240,244,248]);
+    setF(7,'normal',[120,120,120]);
+    doc.text(`Equipment Disassembly Report - ${d.wo||''} (${d.item||''})`,M,294);
+    doc.text(`Page ${i} of ${pc}`,W-M-18,294);
+  }
+
+  doc.save(`EquipmentReport_${d.wo||'DRAFT'}_${d.item||''}.pdf`);
+  toast('PDF exporté ✓');
+}
+
+// ═══════════════════════════════════════════
+// EXPORT DOCX (docx.js)
+// ═══════════════════════════════════════════
+function exportDocx(){
+  const d = collectData();
+  if(!window.docx){toast('DOCX library loading...');return;}
+  const {Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,HeadingLevel,BorderStyle,WidthType,AlignmentType,ShadingType}=window.docx;
+
+  const h1=(txt)=>new Paragraph({heading:HeadingLevel.HEADING_1,children:[new TextRun({text:txt,color:'1a3a5c'})]});
+  const h2=(txt)=>new Paragraph({heading:HeadingLevel.HEADING_2,children:[new TextRun({text:txt,bold:true,color:'374151'})]});
+  const kv=(k,v)=>new Paragraph({children:[new TextRun({text:k+': ',bold:true}),new TextRun(v||'—')]});
+  const blank=()=>new Paragraph('');
+
+  const spTable=new Table({
+    width:{size:100,type:WidthType.PERCENTAGE},
+    rows:[
+      new TableRow({children:['Pos.','Description','Qty','SAP Art.','Stock'].map(h=>new TableCell({
+        shading:{type:ShadingType.SOLID,color:'1a3a5c'},
+        children:[new Paragraph({children:[new TextRun({text:h,bold:true,color:'FFFFFF',size:18})]})]
+      }))}),
+      ...d.spareRows.map(r=>new TableRow({children:[r.pos,r.desc,r.qty,r.sap,r.stock].map(v=>new TableCell({
+        children:[new Paragraph({children:[new TextRun({text:v||'',size:18})]})]
+      }))}))
+    ]
+  });
+
+  const sections=[
+    h1('EQUIPMENT DISASSEMBLING & ASSEMBLING REPORT'),
+    new Paragraph({children:[new TextRun({text:'RELATÓRIO DE DESMONTAGEM & MONTAGEM DE EQUIPAMENTO',italics:true,color:'6b7280'})]}),
+    blank(),
+    h2('1. Equipment Identification'),
+    kv('Client',d.client),kv('Work Order',d.wo),kv('Item',d.item),
+    kv('Serial Number',d.serial),kv('Date',d.rdate),kv('PO/DO/CTR',d.po),
+    kv('Mat. Code / Tag',d.matcode),kv('Size & Rating',d.size),kv('Flange',d.flange),
+    kv('Other Info',d.otherinfo),kv('Description',d.desc),
+    kv('Valve Type',d.vtypes.join(', ')||d.vtypeOther||'—'),
+    blank(),
+    h2('2. Actuator Expertise'),
+    kv('Type',d.actType),kv('Manufacturer',d.actMfr),kv('Model',d.actModel),kv('Serial',d.actSerial),
+    kv('Status',[d.stConform?'Conform':'',d.stLeak?'Leak':'',d.stStuck?'Stuck':''].filter(Boolean).join(' / ')||'—'),
+    kv('Comments',d.actComment),
+    ...ACT_COMPONENTS.map(c=>{
+      const comp=d.actComps.find(x=>x.id===c.id);
+      const on=(comp?.states||[]).filter(s=>s.val).map(s=>s.key).join(', ');
+      return kv(c.label,on+(comp?.comment?`  [${comp.comment}]`:''));
+    }),
+    blank(),
+    h2('3. Valve Components — Trim & Body'),
+    ...TRIM_COMPONENTS.flatMap(c=>{
+      const comp=d.trimComps.find(x=>x.id===c.id);
+      const cond=(comp?.cond||[]).filter(s=>s.val).map(s=>s.key).join(', ');
+      const intv=(comp?.int||[]).filter(s=>s.val).map(s=>s.key).join(', ');
+      return [
+        new Paragraph({children:[new TextRun({text:c.label,bold:true,underline:{}})]}),
+        kv('Condition',cond||'—'),kv('Intervention',intv||'—'),
+        kv('Pictures',comp?.pictures||''),kv('Comments',comp?.comment||''),blank()
+      ];
+    }),
+    h2('4. Parts to Machine / Laping'),
+    new Paragraph(d.partsMachine||'N/A'),
+    blank(),
+    h2('5. Spare Parts Required'),
+    ...(d.spareRows.length>0?[spTable,blank()]:[new Paragraph('None')]),
+    kv('Drawing Ref.',`${d.drawingRef||''} – ${d.drawingMfr||''}`),
+    blank(),
+    h2('6. Comments Inspection'),
+    new Paragraph(d.commentInspection||'—'),
+    blank(),
+    h2('7. Personnel'),
+    kv('Work Prep.',d.sigWorkprep),kv('Technical Supervisor',d.sigSupervisor),
+    kv('Technical Support',`${d.sigSupport1||''}${d.sigSupport2?' / '+d.sigSupport2:''}`),
+    blank(),
+    new Paragraph({children:[new TextRun({text:`Photos attached: ${photos.length}  |  PDF drawings: ${pdfFiles.length}`,color:'6b7280',italics:true,size:18})]})
+  ];
+
+  const docObj=new Document({sections:[{properties:{},children:sections}]});
+  Packer.toBlob(docObj).then(blob=>{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`EquipmentReport_${d.wo||'DRAFT'}_${d.item||''}.docx`;
+    a.click();
+    toast('DOCX exported ✓');
+  });
+}
+
+// ═══════════════════════════════════════════
+// SHARE (Web Share API)
+// ═══════════════════════════════════════════
+async function shareReport(){
+  const d=collectData();
+  const txt=`Equipment Report\nClient: ${d.client}\nWO: ${d.wo} | Item: ${d.item}\nTag: ${d.matcode}\nDate: ${d.rdate}\nSize: ${d.size} ${d.flange}\n\nSpare parts: ${d.spareRows.length} item(s)\nPhotos: ${photos.length}`;
+  if(navigator.share){
+    try{await navigator.share({title:`Equipment Report ${d.wo}`,text:txt});return;}catch(e){}
+  }
+  // Fallback: clipboard
+  try{await navigator.clipboard.writeText(txt);toast('Copied to clipboard ✓');}
+  catch(e){toast('Share not supported');}
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+let toastTimer;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+document.getElementById('rdate').value=new Date().toISOString().split('T')[0];
+buildActuator();
+buildTrim();
+// Prefill a few spare parts as demo
+addSpare('B010','BODY GASKET - AISI316 + GRAPHITE','1','1352613','AO61');
+addSpare('B011','TEC SEAL RING - PTFE + GRAPHITE + ELGILOY','1','1305404','AO91');
+addSpare('B013','SEAT RING - ASTM A479 TY 410 HARDENED','1','1352657','AO91');
+addSpare('B014','SEAT RING GASKET - AISI 316L + GRAPHITE','1','1352661','AO71');
+addSpare('B015','PLUG - ASTM A747 GR CB7CU-1 H1075','1','1372200','x0');
+addSpare('B016','CAGE - ASTM A487 GR CA6NM CLASS B CHROM.PLAT.','1','','x0');
+addSpare('B036','CAGE GASKET - AISI 316L + GRAPHITE','1','1352661','AO71');
+addSpare('B006','PACKING KIT - KEVLAR + PTFE','1 kit','1353071','AO91');
+loadDraft();
+</script>
+</body>
+</html>
