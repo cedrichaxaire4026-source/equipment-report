@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1c1c1c">
+<title>Equipment Report – PROMETIM</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#e8500a;--dark:#1c1c1c;--gray:#6b7280;--gray-light:#f5f5f5;
+  --border:#e5e7eb;--white:#fff;--text:#111827;--radius:8px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;color:var(--text);font-size:14px;min-height:100vh;padding-bottom:80px}
+.app-header{background:var(--dark);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.app-header img{height:36px;background:#fff;padding:2px 6px;border-radius:4px;flex-shrink:0}
+.app-header h1{font-size:13px;font-weight:700;flex:1}
+.app-header .sub{font-size:10px;color:rgba(255,255,255,.55)}
+.hdr-tag{font-size:11px;background:var(--orange);padding:3px 10px;border-radius:20px;white-space:nowrap}
+.nav-tabs{background:var(--dark);padding:0 12px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;border-top:1px solid rgba(255,255,255,.1)}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{color:rgba(255,255,255,.55);font-size:12px;font-weight:500;padding:9px 11px;border-bottom:2px solid transparent;white-space:nowrap;cursor:pointer;background:none;border-left:none;border-right:none;border-top:none;transition:.15s;flex-shrink:0}
+.nav-tab.active{color:#fff;border-bottom-color:var(--orange)}
+.page{display:none;padding:14px;max-width:600px;margin:0 auto}
+.page.active{display:block}
+.card{background:#fff;border-radius:var(--radius);border:0.5px solid var(--border);padding:14px;margin-bottom:10px}
+.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--orange);margin-bottom:10px}
+label{display:block;font-size:12px;font-weight:500;color:var(--gray);margin-bottom:3px;margin-top:8px}
+label:first-child{margin-top:0}
+input[type=text],input[type=date],select,textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:14px;color:var(--text);background:#fff;outline:none;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(232,80,10,.1)}
+textarea{resize:vertical;min-height:60px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vtype-grid{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.vtype-btn{padding:5px 11px;border:1px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;background:#fff;color:var(--gray);transition:.15s}
+.vtype-btn.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.check-section{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:10px}
+.check-section-hdr{background:var(--dark);color:#fff;font-size:12px;font-weight:600;padding:7px 12px}
+.check-section-hdr.orange{background:var(--orange)}
+.check-row{padding:10px 12px;border-bottom:0.5px solid var(--border);background:#fff}
+.check-row:last-child{border-bottom:none}
+.check-label{font-size:13px;font-weight:500;margin-bottom:7px}
+.check-opts{display:flex;flex-wrap:wrap;gap:5px}
+.check-opt{display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px}
+.check-opt input{width:15px;height:15px;accent-color:var(--orange)}
+.int-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.int-col-title{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--gray);letter-spacing:.05em;margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid var(--border)}
+.status-bar{background:#fff8e1;padding:8px 12px;border-bottom:0.5px solid var(--border);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.status-bar span{font-size:12px;font-weight:600;color:#7a5000;margin-right:4px}
+.sp-table{width:100%;border-collapse:collapse;font-size:12px}
+.sp-table th{background:var(--dark);color:#fff;padding:6px 5px;text-align:left;font-size:11px}
+.sp-table td{padding:5px 4px;border-bottom:0.5px solid var(--border)}
+.sp-table td input{border:none;border-bottom:1px solid transparent;padding:2px 3px;font-size:12px;width:100%;background:transparent}
+.sp-table td input:focus{border-bottom-color:var(--orange);outline:none}
+.sp-del{background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;padding:0 3px}
+.add-btn{display:flex;align-items:center;justify-content:center;gap:5px;font-size:13px;color:var(--orange);background:none;border:1px solid var(--orange);border-radius:var(--radius);padding:8px;cursor:pointer;margin-top:8px;font-weight:500;width:100%}
+.photo-zone{border:1.5px dashed var(--border);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;background:#fafafa;margin-top:8px;position:relative}
+.photo-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.photo-zone p{font-size:12px;color:var(--gray);margin-top:5px}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-thumb .del{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer}
+.btn-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:10px 14px;display:flex;gap:8px;z-index:50}
+.btn{flex:1;padding:11px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:5px}
+.btn-dark{background:var(--dark);color:#fff}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-gray{background:var(--gray-light);color:var(--dark);border:1px solid var(--border)}
+.trim-photo-zone{border:1.5px dashed #d1d5db;border-radius:6px;cursor:pointer;background:#fafafa;transition:.2s;overflow:hidden;min-height:36px}
+.trim-photo-zone:hover{border-color:var(--orange);background:#fff8f5}
+@keyframes pulse-border{0%,100%{border-color:#d1d5db}50%{border-color:#e8500a}}
+#toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%) translateY(10px);background:#1f2937;color:#fff;padding:9px 18px;border-radius:20px;font-size:13px;opacity:0;transition:.25s;z-index:999;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* Share modal */
+#share-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:998;align-items:center;justify-content:center}
+.modal-box{background:#fff;border-radius:16px;padding:22px;width:290px;text-align:center}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.modal-sub{font-size:11px;color:var(--gray);margin-bottom:18px}
+.modal-btn{width:100%;padding:13px;border-radius:10px;font-size:14px;font-weight:600;border:none;cursor:pointer;margin-bottom:9px;display:block}
+@media(max-width:380px){.row2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <img src="data:image/png;base64,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" alt="Prometim">
+  <div>
+    <div class="app-header h1" style="font-size:13px;font-weight:700">Equipment Report</div>
+    <div class="sub">Manutenção e Serviços LDA</div>
+  </div>
+  <span class="hdr-tag" id="hdr-tag">New</span>
+</div>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="goPage(0)">Header</button>
+  <button class="nav-tab" onclick="goPage(1)">Actuator</button>
+  <button class="nav-tab" onclick="goPage(2)">Trim & Body</button>
+  <button class="nav-tab" onclick="goPage(3)">Spare Parts / Sobresselentes</button>
+  <button class="nav-tab" onclick="goPage(4)">Photos & Docs</button>
+  <button class="nav-tab" onclick="goPage(5)">Signatures</button>
+</div>
+
+<!-- PAGE 0: HEADER -->
+<div class="page active" id="p0">
+  <div class="card">
+    <div class="card-title">Equipment Identification</div>
+    <label>Client</label><input type="text" id="client" placeholder="Client name / Nome do cliente">
+    <div class="row2">
+      <div><label>WO Prometim</label><input type="text" id="wo" placeholder="OW-24-003-0169"></div>
+      <div><label>WO Client</label><input type="text" id="wo-client" placeholder="Client WO"></div>
+    </div>
+    <div class="row2">
+      <div><label>Item / S-No</label><input type="text" id="item" placeholder="S-5399"></div>
+      <div><label>Date</label><input type="date" id="rdate"></div>
+    </div>
+    <div class="row2">
+      <div><label>Serial Number / Número de Série</label><input type="text" id="serial" placeholder="F-22-000347"></div>
+      <div><label>PO / DO / CTR</label><input type="text" id="po"></div>
+    </div>
+    <div class="row2">
+      <div><label>Mat. Code / Tag</label><input type="text" id="matcode" placeholder="1372271 41 LV 1 3508"></div>
+      <div><label>Size & Rating</label><input type="text" id="size" placeholder="8&quot; / 300#"></div>
+    </div>
+    <div class="row2">
+      <div><label>Flange</label><input type="text" id="flange" placeholder="RF FB"></div>
+      <div><label>Other Info / Site</label><input type="text" id="otherinfo" placeholder="Sonils x PMT: 039-2024"></div>
+    </div>
+    <label>More Description / Descrição</label><input type="text" id="desc" placeholder="CONTROL VALVE 8&quot; 300# RF FB...">
+  </div>
+  <div class="card">
+    <div class="card-title">Valve Type</div>
+    <div class="vtype-grid" id="vtype-grid">
+      <button class="vtype-btn" onclick="toggleVType(this)">Ball</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Globe</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Gate</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Plug</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Butterfly</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Check</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Diaphragm</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Control</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Choke</button>
+      <button class="vtype-btn" onclick="toggleVType(this)">Hydrant</button>
+    </div>
+    <label>Other</label><input type="text" id="vtype-other">
+  </div>
+</div>
+
+<!-- PAGE 1: ACTUATOR -->
+<div class="page" id="p1">
+  <div class="check-section">
+    <div class="check-section-hdr">Actuator Expertise</div>
+    <div class="check-row">
+      <div class="row2">
+        <div><label style="margin-top:0">Type</label>
+          <select id="act-type" onchange="onActTypeChange(this.value)">
+  <option>Pneumatic</option>
+  <option>Hydraulic</option>
+  <option>Electric</option>
+  <option>GearBox</option>
+  <option>Handle</option>
+  <option>Bare Stem</option>
+  <option>Not Applicable / Não Aplicável</option>
+</select>
+        </div>
+        <div><label style="margin-top:0">Manufacturer</label><input type="text" id="act-mfr" placeholder="MASONEILAN"></div>
+      </div>
+      <div class="row2" style="margin-top:6px">
+        <div><label>Model</label><input type="text" id="act-model" placeholder="84-41395"></div>
+        <div><label>Serial Number</label><input type="text" id="act-serial" placeholder="F-22-000347"></div>
+      </div>
+    </div>
+    <div class="status-bar">
+      <span>Status:</span>
+      <label class="check-opt"><input type="checkbox" id="st-conform"><span><b>Conform</b> <span style="color:#9ca3af;font-size:10px">/ Conforme</span></span></label>
+      <label class="check-opt"><input type="checkbox" id="st-leak"><span><b>Leak</b> <span style="color:#9ca3af;font-size:10px">/ Fuga</span></span></label>
+      <label class="check-opt"><input type="checkbox" id="st-stuck"><span><b>Stuck</b> <span style="color:#9ca3af;font-size:10px">/ Presa</span></span></label>
+    </div>
+    <div class="check-row"><label style="margin-top:0">Comments</label>
+      <textarea id="act-comment" placeholder="Actuator has been tested, no leakage found."></textarea>
+    </div>
+  </div>
+  <div class="check-section">
+    <div class="check-section-hdr orange">Actuator Components</div>
+    <div id="act-components"></div>
+  </div>
+</div>
+
+<!-- PAGE 2: TRIM & BODY -->
+<div class="page" id="p2">
+  <div class="check-section">
+    <div class="check-section-hdr">Valve Components — Trim & Body</div>
+    <div id="trim-components"></div>
+  </div>
+</div>
+
+<!-- PAGE 3: SPARE PARTS -->
+<div class="page" id="p3">
+  <div class="card">
+    <div class="card-title">Parts to Machine / Peças a Usinar</div>
+    <textarea id="parts-machine" placeholder="N/A"></textarea>
+  </div>
+  <div class="card">
+    <div class="card-title">Spare Parts Required / Sobresselentes Necessárias</div>
+    <div style="overflow-x:auto">
+      <table class="sp-table">
+        <thead><tr>
+          <th>Description / Designação</th>
+          <th style="width:50px">Qty / Qtd</th>
+          <th style="width:28px"></th>
+        </tr></thead>
+        <tbody id="sp-body"></tbody>
+      </table>
+    </div>
+    <button class="add-btn" onclick="addSpare()">+ Ajouter / Adicionar</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Drawing Reference / Referência do Desenho</div>
+    <div class="row2">
+      <div><label>Ref.</label><input type="text" id="drawing-ref" placeholder="2829432"></div>
+      <div><label>Fabricant / Fabricante</label><input type="text" id="drawing-mfr" placeholder="MASONEILAN"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Comments Inspection / Comentários Inspecção</div>
+    <textarea id="comment-inspection" placeholder="Ex: Valve was dirty / Válvula estava suja."></textarea>
+  </div>
+</div>
+
+<!-- PAGE 4: PHOTOS & SCANS -->
+<div class="page" id="p4">
+
+  <!-- PHOTOS -->
+  <div class="card">
+    <div class="card-title">📷 Photos générales / Fotos gerais</div>
+    <p style="font-size:11px;color:#9ca3af;margin-bottom:8px">Photos d'ensemble, contexte, équipement / Fotos gerais do equipamento</p>
+
+    <!-- Boutons caméra et galerie séparés -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div style="position:relative">
+        <button style="width:100%;background:#e8500a;color:#fff;border:none;padding:12px 8px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">
+          📷 Caméra / Câmera
+        </button>
+        <input type="file" accept="image/*" capture="environment" multiple
+          style="position:absolute;inset:0;opacity:0;cursor:pointer"
+          onchange="addPhotos(this,'general')">
+      </div>
+      <div style="position:relative">
+        <button style="width:100%;background:#1c1c1c;color:#fff;border:none;padding:12px 8px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">
+          🖼 Galerie / Galeria
+        </button>
+        <input type="file" accept="image/*" multiple
+          style="position:absolute;inset:0;opacity:0;cursor:pointer"
+          onchange="addPhotos(this,'general')">
+      </div>
+    </div>
+    <div class="photo-grid" id="photo-grid"></div>
+    <div id="photo-captions" style="margin-top:8px"></div>
+  </div>
+
+  <!-- SCANS / DOCUMENTS -->
+  <div class="card">
+    <div class="card-title">📄 Scans & Documents / Documentos</div>
+    <p style="font-size:11px;color:#9ca3af;margin-bottom:8px">Plans, drawings, datasheets — photo ou PDF / Planos, desenhos, fichas técnicas</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <!-- Scan via caméra -->
+      <div style="position:relative">
+        <button style="width:100%;background:#2563a8;color:#fff;border:none;padding:12px 8px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">
+          📷 Scanner / Digitalizar
+        </button>
+        <input type="file" accept="image/*" capture="environment" multiple
+          style="position:absolute;inset:0;opacity:0;cursor:pointer"
+          onchange="addScans(this,'photo')">
+      </div>
+      <!-- Upload PDF -->
+      <div style="position:relative">
+        <button style="width:100%;background:#374151;color:#fff;border:none;padding:12px 8px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">
+          📎 PDF / Fichier
+        </button>
+        <input type="file" accept="image/*,.pdf,application/pdf" multiple
+          style="position:absolute;inset:0;opacity:0;cursor:pointer"
+          onchange="addScans(this,'file')">
+      </div>
+    </div>
+
+    <!-- Liste des scans -->
+    <div id="scan-list"></div>
+  </div>
+
+</div>
+
+<!-- PAGE 5: SIGNATURES -->
+<div class="page" id="p5">
+  <div class="card">
+    <div class="card-title">Personnel / Pessoal</div>
+    <label>Work Prep. / Preparação de Trabalho</label><input type="text" id="sig-workprep" placeholder="Nom / Nome">
+    <label>Technical Supervisor / Supervisor Técnico</label><input type="text" id="sig-supervisor" placeholder="Nom / Nome">
+    <label>Technical Support 1 / Apoio Técnico 1</label><input type="text" id="sig-support1" placeholder="Nom / Nome">
+    <label>Technical Support 2 / Apoio Técnico 2</label><input type="text" id="sig-support2" placeholder="Nom / Nome">
+  </div>
+  <div class="card" style="background:#fff8f5;border-color:#e8500a">
+    <div class="card-title">Sauvegarde / Guardar</div>
+    <button class="btn btn-dark" style="width:100%;padding:11px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;color:#fff;margin-bottom:8px" onclick="saveDraft()">💾 Sauvegarder / Guardar rascunho</button>
+    <button class="btn btn-gray" style="width:100%;padding:11px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:#dc2626;border:1px solid #dc2626;background:#fff" onclick="newReport()">🗑 Nouveau rapport / Novo relatório</button>
+  </div>
+</div>
+
+<!-- SHARE MODAL -->
+<div id="share-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:998;align-items:center;justify-content:center">
+  <div class="modal-box">
+    <div class="modal-title">Envoyer le rapport</div>
+    <div class="modal-sub">Choisir le format à partager</div>
+    <button class="modal-btn" style="background:var(--orange);color:#fff" onclick="doShare('pdf')">📄 Partager PDF</button>
+    <button class="modal-btn" style="background:var(--dark);color:#fff" onclick="doShare('docx')">📝 Partager DOCX</button>
+    <button class="modal-btn" style="background:var(--dark);color:#fff" onclick="doShare('html')">🌐 Partager HTML</button>
+    <button onclick="document.getElementById('share-modal').style.display='none'" style="background:none;border:none;color:var(--gray);font-size:13px;cursor:pointer;margin-top:4px">Annuler</button>
+  </div>
+</div>
+
+<div class="btn-bar">
+  <button class="btn btn-gray" onclick="exportDocx()">📝 DOCX</button>
+  <button class="btn btn-dark" onclick="exportPdf()">📄 PDF</button>
+  <button class="btn btn-orange" onclick="document.getElementById('share-modal').style.display='flex'">✈️ Envoyer</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const LOGO = 'data:image/png;base64,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';
+
+const ACT_COMPONENTS = [
+  {id:'spring',   label:'Spring Cartridge', label_pt:'Cartucho de mola'},
+  {id:'cylinder', label:'Cylinder Box',     label_pt:'Cylindro'},
+  {id:'tierod',   label:'Tie Rod',          label_pt:'Pernos de ancoragem'},
+  {id:'gear',     label:'Gear',             label_pt:'Engrenagem'},
+  {id:'yoke',     label:'Yoke',             label_pt:'Cabeçote'},
+  {id:'diaphragm',label:'Diaphragm',        label_pt:'Diafragma', noLeak:true},
+];
+// Bilingual labels
+const COND_PT   = {'Good/Boa':'Bon / Boa','Scratches/Arranhões':'Rayures / Arranhões','Craks/Rachaduras':'Fissures / Rachaduras','Corroded/Corroída':'Corrodé / Corroída','Damage/Danificado':'Endommagé / Danificado'};
+const INT_PT    = {'Reuse/Reutilização':'Réutiliser / Reutilizar','Reparation/Reparação':'Réparer / Reparar','Machinning/Usinagem':'Usinage / Usinagem','Replace/Substituir':'Remplacer / Substituir','inspection/inspecção':'Inspection / Inspecção'};
+const ACT_ST_PT = {'Good/Boa':'Bon / Boa','Corroded/Corroída':'Corrodé / Corroída','Damage/Danificado':'Endommagé / Danificado','Leakage/Fuga':'Fuite / Fuga'};
+const ACT_INT_OPTIONS = ['Reuse/Reutilização','Replace/Substituir'];
+const ACT_INT_PT = {'Reuse/Reutilização':'Réutiliser / Reutilizar','Replace/Substituir':'Remplacer / Substituir'};
+const TRIM_COMPONENTS = [
+  {id:'body', label:'Body', label_pt:'Corpo'},
+  {id:'ball', label:'Ball / Wedge / Disc / Plug', label_pt:'Ball / Cunhas / Disco'},
+  {id:'seatA', label:'Seat Ring A', label_pt:'Sede A'},
+  {id:'seatB', label:'Seat Ring B / Cage', label_pt:'Sede B / Gaiola'},
+  {id:'upperbox', label:'Upper Box / Packing Gland', label_pt:'Caixa superior/Glândula'},
+  {id:'stem', label:'Upper Stem & Low Stem', label_pt:'Haste inferior & Superior'},
+];
+const COND_OPTIONS = ['Good/Boa','Scratches/Arranhões','Craks/Rachaduras','Corroded/Corroída','Damage/Danificado'];
+const INT_OPTIONS  = ['Reuse/Reutilização','Reparation/Reparação','Machinning/Usinagem','Replace/Substituir','inspection/inspecção'];
+
+let photos = [], spareRows = [], spareId = 0;
+
+// ── BUILD ACTUATOR ──
+function buildActuator(){
+  const c = document.getElementById('act-components');
+  c.innerHTML = ACT_COMPONENTS.map(comp=>{
+    const condOpts = comp.noLeak ? ['Good/Boa','Leakage/Fuga'] : ['Good/Boa','Corroded/Corroída','Damage/Danificado'];
+    const condHtml = condOpts.map(o=>{
+      const pt = ACT_ST_PT[o]||o;
+      return `<label class="check-opt" style="margin-bottom:4px">
+        <input type="checkbox" id="act_${comp.id}_${o.split('/')[0]}"
+          onchange="onActCondChange('${comp.id}',this)">
+        <span style="font-size:11px"><b>${o.split('/')[0]}</b> <span style="color:#9ca3af;font-size:10px">/ ${pt.split('/').pop().trim()}</span></span>
+      </label>`;
+    }).join('');
+    const intHtml = ACT_INT_OPTIONS.map(o=>{
+      const pt = ACT_INT_PT[o]||o;
+      return `<label class="check-opt" style="margin-bottom:4px">
+        <input type="checkbox" id="act_${comp.id}_int_${o.split('/')[0]}">
+        <span style="font-size:11px"><b>${o.split('/')[0]}</b> <span style="color:#9ca3af;font-size:10px">/ ${pt.split('/').pop().trim()}</span></span>
+      </label>`;
+    }).join('');
+    return `<div class="check-row">
+      <div class="check-label" style="font-size:13px;font-weight:600;color:#1c1c1c">
+        ${comp.label} <span style="color:#9ca3af;font-size:11px;font-weight:400">(${comp.label_pt})</span>
+      </div>
+      <div class="int-grid">
+        <div>
+          <div class="int-col-title">Condition / Estado</div>
+          ${condHtml}
+          <!-- Photo BEFORE -->
+          <div style="margin-top:8px">
+            <div style="font-size:10px;font-weight:600;color:#e8500a;margin-bottom:3px">📷 BEFORE / Antes</div>
+            <div class="trim-photo-zone" id="act_${comp.id}_before_zone" onclick="triggerActPhoto('${comp.id}','before')">
+              <div id="act_${comp.id}_before_preview" style="display:none;position:relative">
+                <img id="act_${comp.id}_before_img" style="width:100%;height:70px;object-fit:cover;border-radius:5px">
+                <button onclick="event.stopPropagation();clearActPhoto('${comp.id}','before')"
+                  style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer">×</button>
+              </div>
+              <div id="act_${comp.id}_before_placeholder" style="text-align:center;padding:8px;color:#9ca3af;font-size:11px">
+                📷 Photo avant<br><span style="font-size:10px;color:#bbb">optionnel / opcional</span>
+              </div>
+            </div>
+            <input type="file" accept="image/*" capture="environment" id="act_${comp.id}_before_input" style="display:none" onchange="onActPhoto('${comp.id}','before',this)">
+          </div>
+        </div>
+        <div>
+          <div class="int-col-title">Intervention / Intervenção</div>
+          ${intHtml}
+          <!-- Photo AFTER -->
+          <div style="margin-top:8px">
+            <div style="font-size:10px;font-weight:600;color:#1c1c1c;margin-bottom:3px">📷 AFTER / Depois</div>
+            <div class="trim-photo-zone" id="act_${comp.id}_after_zone" onclick="triggerActPhoto('${comp.id}','after')">
+              <div id="act_${comp.id}_after_preview" style="display:none;position:relative">
+                <img id="act_${comp.id}_after_img" style="width:100%;height:70px;object-fit:cover;border-radius:5px">
+                <button onclick="event.stopPropagation();clearActPhoto('${comp.id}','after')"
+                  style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer">×</button>
+              </div>
+              <div id="act_${comp.id}_after_placeholder" style="text-align:center;padding:8px;color:#9ca3af;font-size:11px">
+                📷 Photo après<br><span style="font-size:10px;color:#bbb">optionnel / opcional</span>
+              </div>
+            </div>
+            <input type="file" accept="image/*" capture="environment" id="act_${comp.id}_after_input" style="display:none" onchange="onActPhoto('${comp.id}','after',this)">
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:6px">
+        <input type="text" id="act_${comp.id}_comment" placeholder="Comment / Comentário..." style="font-size:12px;padding:5px 8px">
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── ACT TYPE CHANGE ──
+function onActTypeChange(val){
+  const naTypes=['Not Applicable / Não Aplicável','Handle','Bare Stem','GearBox'];
+  const isNA = naTypes.includes(val);
+  // Show/hide actuator components section
+  const section = document.getElementById('act-components').closest('.check-section');
+  const compSection = document.getElementById('act-components');
+  if(isNA){
+    // Uncheck all and disable
+    ACT_COMPONENTS.forEach(comp=>{
+      const opts=comp.noLeak?['Good/Boa','Leakage/Fuga']:['Good/Boa','Corroded/Corroída','Damage/Danificado'];
+      opts.forEach(o=>{
+        const el=document.getElementById(`act_${comp.id}_${o.split('/')[0]}`);
+        if(el){el.checked=false;el.disabled=true;}
+      });
+      ['Reuse/Reutilização','Replace/Substituir'].forEach(o=>{
+        const el=document.getElementById(`act_${comp.id}_int_${o.split('/')[0]}`);
+        if(el){el.checked=false;el.disabled=true;}
+      });
+      const comment=document.getElementById(`act_${comp.id}_comment`);
+      if(comment){comment.value='N/A';comment.disabled=true;}
+    });
+    compSection.style.opacity='0.3';
+    compSection.style.pointerEvents='none';
+    // Clear status
+    ['st-conform','st-leak','st-stuck'].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.checked=false;
+    });
+    document.getElementById('act-comment').value='Not Applicable / Não Aplicável';
+  } else {
+    // Re-enable
+    ACT_COMPONENTS.forEach(comp=>{
+      const opts=comp.noLeak?['Good/Boa','Leakage/Fuga']:['Good/Boa','Corroded/Corroída','Damage/Danificado'];
+      opts.forEach(o=>{
+        const el=document.getElementById(`act_${comp.id}_${o.split('/')[0]}`);
+        if(el){el.disabled=false;}
+      });
+      ['Reuse/Reutilização','Replace/Substituir'].forEach(o=>{
+        const el=document.getElementById(`act_${comp.id}_int_${o.split('/')[0]}`);
+        if(el){el.disabled=false;}
+      });
+      const comment=document.getElementById(`act_${comp.id}_comment`);
+      if(comment){comment.value='';comment.disabled=false;}
+    });
+    compSection.style.opacity='';
+    compSection.style.pointerEvents='';
+    document.getElementById('act-comment').value='';
+  }
+}
+
+// Actuator photo storage
+const actPhotos = {};
+
+function triggerActPhoto(compId, side){
+  document.getElementById(`act_${compId}_${side}_input`).click();
+}
+function onActPhoto(compId, side, input){
+  const file=input.files[0]; if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    actPhotos[`${compId}_${side}`]=e.target.result;
+    document.getElementById(`act_${compId}_${side}_img`).src=e.target.result;
+    document.getElementById(`act_${compId}_${side}_preview`).style.display='block';
+    document.getElementById(`act_${compId}_${side}_placeholder`).style.display='none';
+    const z=document.getElementById(`act_${compId}_${side}_zone`);
+    z.style.borderColor='#e8500a';z.style.background='#fff8f5';
+  };
+  r.readAsDataURL(file);input.value='';
+}
+function clearActPhoto(compId, side){
+  delete actPhotos[`${compId}_${side}`];
+  document.getElementById(`act_${compId}_${side}_preview`).style.display='none';
+  document.getElementById(`act_${compId}_${side}_placeholder`).style.display='block';
+  const z=document.getElementById(`act_${compId}_${side}_zone`);
+  z.style.borderColor='';z.style.background='';
+}
+function onActCondChange(compId, checkbox){
+  const label=checkbox.closest('label').querySelector('span b').textContent;
+  if(checkbox.checked && label!=='Good'){
+    const zone=document.getElementById(`act_${compId}_before_zone`);
+    if(zone&&!actPhotos[`${compId}_before`]){
+      zone.style.borderColor='#e8500a';zone.style.background='#fff1eb';
+      toast('📷 Photo conseillée / Foto recomendada: '+label);
+    }
+  }
+}
+
+// ── BUILD TRIM ──
+function buildTrim(){
+  const c = document.getElementById('trim-components');
+  c.innerHTML = TRIM_COMPONENTS.map(comp=>`
+    <div class="check-row">
+      <div class="check-label">${comp.label} <span style="color:#9ca3af;font-size:11px">(${comp.label_pt})</span></div>
+      <div class="int-grid">
+        <div>
+          <div class="int-col-title">Condition</div>
+          ${COND_OPTIONS.map(o=>{const pt=COND_PT[o]||o;return `<label class="check-opt" style="margin-bottom:3px"><input type="checkbox" id="trim_${comp.id}_cond_${o.split('/')[0]}"
+            onchange="onCondChange('${comp.id}',this)"><span style="font-size:11px"><b>${o.split('/')[0]}</b> <span style="color:#9ca3af;font-size:10px">/ ${pt.split('/').pop().trim()}</span></span></label>`;}).join('')}
+          <!-- Photo BEFORE -->
+          <div style="margin-top:8px">
+            <div style="font-size:10px;font-weight:600;color:#e8500a;margin-bottom:4px">📷 Photo BEFORE</div>
+            <div class="trim-photo-zone" id="trim_${comp.id}_before_zone" onclick="triggerTrimPhoto('${comp.id}','before')">
+              <div id="trim_${comp.id}_before_preview" style="display:none;position:relative">
+                <img id="trim_${comp.id}_before_img" style="width:100%;height:70px;object-fit:cover;border-radius:5px">
+                <button onclick="event.stopPropagation();clearTrimPhoto('${comp.id}','before')" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;line-height:1">×</button>
+              </div>
+              <div id="trim_${comp.id}_before_placeholder" style="text-align:center;padding:8px;color:#9ca3af;font-size:11px">
+                📷 Prendre photo<br><span style="font-size:10px">optionnel</span>
+              </div>
+            </div>
+            <input type="file" accept="image/*" capture="environment" id="trim_${comp.id}_before_input" style="display:none" onchange="onTrimPhoto('${comp.id}','before',this)">
+          </div>
+        </div>
+        <div>
+          <div class="int-col-title">Intervention done</div>
+          ${INT_OPTIONS.map(o=>{const pt=INT_PT[o]||o;return `<label class="check-opt" style="margin-bottom:3px"><input type="checkbox" id="trim_${comp.id}_int_${o.split('/')[0]}"><span style="font-size:11px"><b>${o.split('/')[0]}</b> <span style="color:#9ca3af;font-size:10px">/ ${pt.split('/').pop().trim()}</span></span></label>`;}).join('')}
+          <!-- Photo AFTER -->
+          <div style="margin-top:8px">
+            <div style="font-size:10px;font-weight:600;color:#1c1c1c;margin-bottom:4px">📷 Photo AFTER</div>
+            <div class="trim-photo-zone" id="trim_${comp.id}_after_zone" onclick="triggerTrimPhoto('${comp.id}','after')">
+              <div id="trim_${comp.id}_after_preview" style="display:none;position:relative">
+                <img id="trim_${comp.id}_after_img" style="width:100%;height:70px;object-fit:cover;border-radius:5px">
+                <button onclick="event.stopPropagation();clearTrimPhoto('${comp.id}','after')" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;line-height:1">×</button>
+              </div>
+              <div id="trim_${comp.id}_after_placeholder" style="text-align:center;padding:8px;color:#9ca3af;font-size:11px">
+                📷 Prendre photo<br><span style="font-size:10px">optionnel</span>
+              </div>
+            </div>
+            <input type="file" accept="image/*" capture="environment" id="trim_${comp.id}_after_input" style="display:none" onchange="onTrimPhoto('${comp.id}','after',this)">
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:6px">
+        <input type="text" id="trim_${comp.id}_comment" placeholder="Comments..." style="font-size:12px;padding:5px 8px">
+      </div>
+    </div>`).join('');
+}
+
+// Trim photo storage
+const trimPhotos = {}; // {compId_before: dataUrl, compId_after: dataUrl}
+
+function triggerTrimPhoto(compId, side){
+  document.getElementById(`trim_${compId}_${side}_input`).click();
+}
+
+function onTrimPhoto(compId, side, input){
+  const file = input.files[0];
+  if(!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    const dataUrl = e.target.result;
+    trimPhotos[`${compId}_${side}`] = dataUrl;
+    const img = document.getElementById(`trim_${compId}_${side}_img`);
+    img.src = dataUrl;
+    document.getElementById(`trim_${compId}_${side}_preview`).style.display = 'block';
+    document.getElementById(`trim_${compId}_${side}_placeholder`).style.display = 'none';
+    // Flash the zone orange
+    const zone = document.getElementById(`trim_${compId}_${side}_zone`);
+    zone.style.borderColor = '#e8500a';
+    zone.style.background = '#fff8f5';
+  };
+  r.readAsDataURL(file);
+  input.value = '';
+}
+
+function clearTrimPhoto(compId, side){
+  delete trimPhotos[`${compId}_${side}`];
+  document.getElementById(`trim_${compId}_${side}_preview`).style.display = 'none';
+  document.getElementById(`trim_${compId}_${side}_placeholder`).style.display = 'block';
+  const zone = document.getElementById(`trim_${compId}_${side}_zone`);
+  zone.style.borderColor = '';zone.style.background = '';
+}
+
+// When a NON-Good condition is checked → prompt photo
+function onCondChange(compId, checkbox){
+  const label = checkbox.closest('label').querySelector('span').textContent;
+  if(checkbox.checked && label !== 'Good/Boa'){
+    // Highlight before photo zone
+    const zone = document.getElementById(`trim_${compId}_before_zone`);
+    if(zone && !trimPhotos[`${compId}_before`]){
+      zone.style.borderColor = '#e8500a';
+      zone.style.background = '#fff1eb';
+      zone.style.animation = 'pulse-border 1s 3';
+      toast('📷 Photo conseillée pour: '+label);
+    }
+  }
+}
+
+// ── PHOTOS ──
+let scans = []; // {dataUrl, name, type:'photo'|'pdf', caption}
+
+function addPhotos(input, tag){
+  Array.from(input.files).forEach(f=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      photos.push({dataUrl:e.target.result, caption:`Photo ${photos.length+1}`});
+      renderPhotos();
+    };
+    r.readAsDataURL(f);
+  });
+  input.value='';
+}
+
+function renderPhotos(){
+  document.getElementById('photo-grid').innerHTML=photos.map((p,i)=>`
+    <div class="photo-thumb">
+      <img src="${p.dataUrl}">
+      <button class="del" onclick="delPhoto(${i})">×</button>
+    </div>`).join('');
+  document.getElementById('photo-captions').innerHTML=photos.map((p,i)=>`
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+      <span style="font-size:11px;color:#9ca3af;min-width:52px">Photo ${i+1}</span>
+      <input type="text" value="${p.caption}" onchange="photos[${i}].caption=this.value" style="font-size:12px;padding:4px 8px">
+    </div>`).join('');
+}
+function delPhoto(i){photos.splice(i,1);renderPhotos();}
+
+// ── SCANS / DOCUMENTS ──
+function addScans(input, type){
+  Array.from(input.files).forEach(f=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      const isPdf = f.type==='application/pdf' || f.name.toLowerCase().endsWith('.pdf');
+      scans.push({
+        dataUrl: e.target.result,
+        name: f.name,
+        type: isPdf?'pdf':'photo',
+        caption: f.name.replace(/\.[^.]+$/,'')
+      });
+      renderScans();
+    };
+    r.readAsDataURL(f);
+  });
+  input.value='';
+}
+
+function renderScans(){
+  const list = document.getElementById('scan-list');
+  if(scans.length===0){list.innerHTML='';return;}
+  list.innerHTML = scans.map((s,i)=>{
+    const isPdf = s.type==='pdf';
+    const preview = isPdf
+      ? `<div style="width:54px;height:54px;background:#f0f4ff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📄</div>`
+      : `<img src="${s.dataUrl}" style="width:54px;height:54px;object-fit:cover;border-radius:6px;flex-shrink:0;border:1px solid #e5e7eb">`;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:6px;background:#fafafa">
+      ${preview}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:10px;color:#9ca3af;margin-bottom:3px">${isPdf?'📄 PDF':'🖼 Image'}</div>
+        <input type="text" value="${s.caption}" onchange="scans[${i}].caption=this.value"
+          style="font-size:12px;padding:3px 6px;width:100%;border:1px solid #e5e7eb;border-radius:5px">
+      </div>
+      <button onclick="delScan(${i})" style="background:none;border:none;color:#dc2626;font-size:18px;cursor:pointer;flex-shrink:0">×</button>
+    </div>`;
+  }).join('');
+}
+function delScan(i){scans.splice(i,1);renderScans();}
+
+// ── SPARE PARTS ──
+function addSpare(){
+  spareRows.push({id:spareId++,desc:'',qty:'1'});
+  renderSpares();
+}
+function renderSpares(){
+  document.getElementById('sp-body').innerHTML=spareRows.map((r,i)=>`
+    <tr style="background:${i%2===0?'#fff':'#f9f9f9'}">
+      <td><input type="text" value="${r.desc}" onchange="spareRows[${i}].desc=this.value" placeholder="Ex: BODY GASKET - AISI316 + GRAPHITE" style="width:100%"></td>
+      <td><input type="text" value="${r.qty}" onchange="spareRows[${i}].qty=this.value" style="width:44px;text-align:center"></td>
+      <td><button class="sp-del" onclick="delSpare(${i})">×</button></td>
+    </tr>`).join('');
+}
+function delSpare(i){spareRows.splice(i,1);renderSpares();}
+
+// ── NAV ──
+function goPage(n){
+  document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('active',i===n));
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+  updateHeader();
+}
+function toggleVType(b){b.classList.toggle('active');}
+function updateHeader(){
+  const wo=document.getElementById('wo').value,item=document.getElementById('item').value;
+  const woc=document.getElementById('wo-client')?.value||'';
+  document.getElementById('hdr-tag').textContent=(wo||item)?`${wo}${woc?' | '+woc:''} / ${item}`:'New';
+}
+['wo','wo-client','item'].forEach(id=>document.getElementById(id)?.addEventListener('input',updateHeader));
+
+// ── COLLECT DATA ──
+function collectData(){
+  const g=id=>(document.getElementById(id)||{}).value||'';
+  const c=id=>!!((document.getElementById(id)||{}).checked);
+  return {
+    client:g('client'),wo:g('wo'),woClient:g('wo-client'),item:g('item'),serial:g('serial'),
+    rdate:g('rdate'),po:g('po'),matcode:g('matcode'),size:g('size'),
+    flange:g('flange'),otherinfo:g('otherinfo'),desc:g('desc'),
+    vtypes:[...document.querySelectorAll('.vtype-btn.active')].map(b=>b.textContent),
+    vtypeOther:g('vtype-other'),
+    actType:g('act-type'),actMfr:g('act-mfr'),actModel:g('act-model'),actSerial:g('act-serial'),
+    stConform:c('st-conform'),stLeak:c('st-leak'),stStuck:c('st-stuck'),
+    actComment:g('act-comment'),
+    actComps:ACT_COMPONENTS.map(comp=>({
+      id:comp.id,
+      states:(comp.noLeak?['Good/Boa','Leakage/Fuga']:['Good/Boa','Corroded/Corroída','Damage/Danificado']).map(o=>({
+        key:o.split('/')[0],val:c(`act_${comp.id}_${o.split('/')[0]}`)
+      })),
+      intervention:ACT_INT_OPTIONS.map(o=>({key:o.split('/')[0],val:c(`act_${comp.id}_int_${o.split('/')[0]}`)})),
+      comment:g(`act_${comp.id}_comment`),
+      photoBefore:actPhotos[`${comp.id}_before`]||null,
+      photoAfter:actPhotos[`${comp.id}_after`]||null,
+    })),
+    trimComps:TRIM_COMPONENTS.map(comp=>({
+      id:comp.id,
+      cond:COND_OPTIONS.map(o=>({key:o.split('/')[0],val:c(`trim_${comp.id}_cond_${o.split('/')[0]}`)})),
+      int:INT_OPTIONS.map(o=>({key:o.split('/')[0],val:c(`trim_${comp.id}_int_${o.split('/')[0]}`)})),
+      comment:g(`trim_${comp.id}_comment`),
+      photoBefore:trimPhotos[`${comp.id}_before`]||null,
+      photoAfter:trimPhotos[`${comp.id}_after`]||null,
+    })),
+    spareRows:[...spareRows],
+    partsMachine:g('parts-machine'),drawingRef:g('drawing-ref'),drawingMfr:g('drawing-mfr'),
+    commentInspection:g('comment-inspection'),
+    sigWorkprep:g('sig-workprep'),sigSupervisor:g('sig-supervisor'),
+    sigSupport1:g('sig-support1'),sigSupport2:g('sig-support2'),
+  };
+}
+
+// ── DRAFT ──
+function saveDraft(){
+  const d=collectData();
+  d.photosData=photos;d.spareRowsData=spareRows;d.trimPhotosData={...trimPhotos};d.actPhotosData={...actPhotos};d.scansData=scans;
+  try{localStorage.setItem('eq_draft',JSON.stringify(d));toast('Brouillon sauvegardé ✓');}
+  catch(e){toast('Erreur sauvegarde');}
+}
+function loadDraft(){
+  try{
+    const s=localStorage.getItem('eq_draft');if(!s)return;
+    const d=JSON.parse(s);
+    const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||'';};
+    const chk=(id,v)=>{const el=document.getElementById(id);if(el)el.checked=!!v;};
+    set('client',d.client);set('wo',d.wo);set('wo-client',d.woClient);set('item',d.item);set('serial',d.serial);
+    set('rdate',d.rdate);set('po',d.po);set('matcode',d.matcode);set('size',d.size);
+    set('flange',d.flange);set('otherinfo',d.otherinfo);set('desc',d.desc);
+    set('vtype-other',d.vtypeOther);
+    document.querySelectorAll('.vtype-btn').forEach(b=>b.classList.toggle('active',(d.vtypes||[]).includes(b.textContent)));
+    set('act-type',d.actType);set('act-mfr',d.actMfr);set('act-model',d.actModel);set('act-serial',d.actSerial);
+    chk('st-conform',d.stConform);chk('st-leak',d.stLeak);chk('st-stuck',d.stStuck);
+    set('act-comment',d.actComment);
+    (d.actComps||[]).forEach(comp=>{
+      comp.states.forEach(s=>chk(`act_${comp.id}_${s.key}`,s.val));
+      set(`act_${comp.id}_comment`,comp.comment);
+    });
+    (d.trimComps||[]).forEach(comp=>{
+      comp.cond.forEach(s=>chk(`trim_${comp.id}_cond_${s.key}`,s.val));
+      comp.int.forEach(s=>chk(`trim_${comp.id}_int_${s.key}`,s.val));
+      set(`trim_${comp.id}_pictures`,comp.pictures);set(`trim_${comp.id}_comment`,comp.comment);
+    });
+    set('parts-machine',d.partsMachine);set('drawing-ref',d.drawingRef);set('drawing-mfr',d.drawingMfr);
+    set('comment-inspection',d.commentInspection);
+    set('sig-workprep',d.sigWorkprep);set('sig-supervisor',d.sigSupervisor);
+    set('sig-support1',d.sigSupport1);set('sig-support2',d.sigSupport2);
+    spareRows=d.spareRowsData||[];spareId=spareRows.length;renderSpares();
+    photos=d.photosData||[];renderPhotos();
+    scans=d.scansData||[];renderScans();
+    // Restore trim photos
+    const tp=d.trimPhotosData||{};
+    Object.keys(tp).forEach(k=>{
+      trimPhotos[k]=tp[k];
+      const [compId,side]=k.split('_').slice(0,-0);
+      // reconstruct key parts
+      const parts=k.split('_');
+      const s=parts[parts.length-1]; // before or after
+      const cId=parts.slice(0,-1).join('_');
+      const img=document.getElementById(`trim_${cId}_${s}_img`);
+      if(img){img.src=tp[k];
+        document.getElementById(`trim_${cId}_${s}_preview`).style.display='block';
+        document.getElementById(`trim_${cId}_${s}_placeholder`).style.display='none';
+      }
+    });
+    updateHeader();
+  }catch(e){}
+}
+function newReport(){
+  if(!confirm('Vider tout le rapport ?'))return;
+  localStorage.removeItem('eq_draft');location.reload();
+}
+
+// ── GENERATE REPORT HTML (A4, logo, Prometim layout) ──
+function generateReportHTML(d){
+  const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const chk=v=>v?'<span style="color:#e8500a;font-weight:bold;font-size:9pt">&#9746;</span>':'<span style="color:#ccc;font-size:9pt">&#9744;</span>';
+  const client = d.client||'CLIENT';
+  const wo     = d.wo||'WO';
+  const item   = d.item||'ITEM';
+  const fname  = client+'-'+wo+'-'+item;
+  const doctitle = client+' — '+wo+' — '+item;
+  const LOGO   = document.querySelector('.app-header img').src;
+  const S=(bg,txt)=>`<div style="background:${bg};color:#fff;font-weight:bold;font-size:8pt;padding:3px 7px">${txt}</div>`;
+  const TH=(txt,w,bg)=>`<th style="background:${bg||'#1c1c1c'};color:#fff;font-size:6.5pt;padding:2px 4px;border:.4pt solid #888;${w?'width:'+w+';':''}text-align:left">${txt}</th>`;
+  const TD2=(l,v)=>`<td style="background:#f5f5f5;font-weight:bold;color:#555;font-size:6.5pt;padding:2px 3px;border:.4pt solid #ccc;white-space:nowrap">${l}</td><td style="border:.4pt solid #ccc;padding:2px 4px;font-size:7pt"><input class="f" type="text" value="${esc(v)}"></td>`;
+
+  const vtHtml=['Ball','Globe','Gate','Plug','Butterfly','Check','Diaphragm','Control','Choke','Hydrant'].map(t=>{
+    const on=d.vtypes.includes(t);
+    return `<span style="font-size:7pt;margin-right:5px;${on?'color:#e8500a;font-weight:bold':'color:#bbb'}">${chk(on)} ${t}</span>`;
+  }).join('');
+
+  // ── PHOTO CELL helper — no drop zone in print, just image or empty ──
+  const photoCell=(dataUrl,label,color,compId,side,idPrefix)=>{
+    const hasPhoto = !!dataUrl;
+    return `<td style="border:.4pt solid #ccc;padding:3px;vertical-align:top;text-align:center;background:${color==='orange'?'#fff8f5':'#f7f8f7'}">
+      <div style="font-size:5.5pt;font-weight:bold;color:${color==='orange'?'#e8500a':'#374151'};margin-bottom:2px">${label}</div>
+      ${hasPhoto
+        ? `<img src="${dataUrl}" style="width:100%;max-height:32mm;object-fit:cover;border-radius:2px;border:.4pt solid #ddd;display:block">`
+        : `<div class="no-print" style="border:1pt dashed ${color==='orange'?'#fcd9c8':'#d1d5db'};border-radius:3px;height:20mm;display:flex;align-items:center;justify-content:center"><span style="color:${color==='orange'?'#fcd9c8':'#d1d5db'};font-size:14pt">📷</span></div>`
+      }
+      <label class="no-print" style="margin-top:3px;display:block;cursor:pointer">
+        <div style="border:1px solid ${color==='orange'?'#e8500a':'#374151'};border-radius:3px;padding:2px;font-size:5.5pt;color:${color==='orange'?'#e8500a':'#374151'};text-align:center;background:${color==='orange'?'#fff1eb':'#f5f5f5'}">📷 ${hasPhoto?'Changer':'Ajouter'}</div>
+        <input type="file" accept="image/*" style="display:none" onchange="(function(f,pid){if(!f)return;const r=new FileReader();r.onload=function(ev){var el=document.getElementById(pid);if(el){el.src=ev.target.result;el.style.display='block';var ph=document.getElementById(pid+'_ph');if(ph)ph.style.display='none';}};r.readAsDataURL(f);})(this.files[0],'${idPrefix}_${compId}')">
+      </label>
+      <img id="${idPrefix}_${compId}" src="${dataUrl||''}" style="display:${hasPhoto?'none':'none'};width:100%;margin-top:2px;border-radius:2px">
+    </td>`;
+  };
+
+  // ── ACT COMPONENTS — 5 columns ──
+  const ACT_COMPS=[
+    {id:'spring',   label:'Spring Cartridge', label_pt:'Cartucho de mola'},
+    {id:'cylinder', label:'Cylinder Box',      label_pt:'Cylindro'},
+    {id:'tierod',   label:'Tie Rod',           label_pt:'Pernos de ancoragem'},
+    {id:'gear',     label:'Gear',              label_pt:'Engrenagem'},
+    {id:'yoke',     label:'Yoke',              label_pt:'Cabeçote'},
+    {id:'diaphragm',label:'Diaphragm',         label_pt:'Diafragma', noLeak:true},
+  ];
+  const actRows=ACT_COMPS.map(comp=>{
+    const ac  = d.actComps.find(x=>x.id===comp.id)||{states:[],intervention:[],comment:''};
+    const stOn= (ac.states||[]).filter(s=>s.val).map(s=>s.key);
+    const intOn=(ac.intervention||[]).filter(s=>s.val).map(s=>s.key);
+    const condOpts=comp.noLeak?['Good/Boa','Leakage/Fuga']:['Good/Boa','Corroded/Corroída','Damage/Danificado'];
+    const cHtml=condOpts.map(o=>{const k=o.split('/')[0];const on=stOn.includes(k);
+      return `<label style="display:flex;align-items:center;gap:3px;margin-bottom:2px;font-size:6.5pt;cursor:pointer;${on?'color:#e8500a;font-weight:bold':''}">${chk(on)} ${o}</label>`;}).join('');
+    const iHtml=['Reuse/Reutilização','Replace/Substituir'].map(o=>{const k=o.split('/')[0];const on=intOn.includes(k);
+      return `<label style="display:flex;align-items:center;gap:3px;margin-bottom:2px;font-size:6.5pt;cursor:pointer;${on?'color:#e8500a;font-weight:bold':''}">${chk(on)} ${o}</label>`;}).join('');
+    return `<tr>
+      <td style="border:.4pt solid #ccc;padding:0;vertical-align:top;width:26mm;background:#f9f9f9">
+        <div style="background:#e8500a;color:#fff;font-weight:bold;font-size:6.5pt;padding:2px 4px">${esc(comp.label)}</div>
+        <div style="color:#aaa;font-size:5.5pt;padding:1px 4px 2px">${esc(comp.label_pt)}</div>
+        <div style="padding:2px 4px 4px">${cHtml}</div>
+      </td>
+      ${photoCell(ac.photoBefore,'📷 BEFORE/Antes','orange',comp.id,'before','ab')}
+      <td style="border:.4pt solid #ccc;padding:3px 4px;vertical-align:top;width:26mm;background:#f9f9f9">
+        <div style="font-size:5.5pt;color:#555;font-weight:bold;margin-bottom:2px">Intervention/Intervenção</div>
+        ${iHtml}
+      </td>
+      ${photoCell(ac.photoAfter,'📷 AFTER/Depois','dark',comp.id,'after','aa')}
+      <td style="border:.4pt solid #ccc;padding:3px 4px;vertical-align:top">
+        <div style="font-size:5.5pt;color:#555;font-weight:bold;margin-bottom:2px">Comments/Comentários</div>
+        <textarea class="f" style="width:100%;min-height:16mm;border:1px solid #e5e7eb;border-radius:2px;padding:2px;font-size:6.5pt;resize:vertical">${esc(ac.comment||'')}</textarea>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // ── TRIM COMPONENTS — 5 columns (same layout) ──
+  const TRIM_COMPS=[
+    {id:'body',     label:'Body',                      label_pt:'Corpo'},
+    {id:'ball',     label:'Ball / Wedge / Disc / Plug', label_pt:'Ball / Cunhas / Disco'},
+    {id:'seatA',    label:'Seat Ring A',                label_pt:'Sede A'},
+    {id:'seatB',    label:'Seat Ring B / Cage',         label_pt:'Sede B / Gaiola'},
+    {id:'upperbox', label:'Upper Box / Packing Gland',  label_pt:'Caixa superior/Glândula'},
+    {id:'stem',     label:'Upper Stem & Low Stem',      label_pt:'Haste inferior & Superior'},
+  ];
+  const COND_OPT=['Good/Boa','Scratches/Arranhões','Craks/Rachaduras','Corroded/Corroída','Damage/Danificado'];
+  const INT_OPT =['Reuse/Reutilização','Reparation/Reparação','Machinning/Usinagem','Replace/Substituir','inspection/inspecção'];
+
+  const trimRows=TRIM_COMPS.map(comp=>{
+    const tc  = d.trimComps.find(x=>x.id===comp.id)||{cond:[],int:[],comment:''};
+    const cOn = (tc.cond||[]).filter(s=>s.val).map(s=>s.key);
+    const iOn = (tc.int||[]).filter(s=>s.val).map(s=>s.key);
+    const cHtml=COND_OPT.map(o=>{const k=o.split('/')[0];const on=cOn.includes(k);
+      return `<label style="display:flex;align-items:center;gap:3px;margin-bottom:2px;font-size:6.5pt;cursor:pointer;${on?'color:#e8500a;font-weight:bold':''}">${chk(on)} ${o}</label>`;}).join('');
+    const iHtml=INT_OPT.map(o=>{const k=o.split('/')[0];const on=iOn.includes(k);
+      return `<label style="display:flex;align-items:center;gap:3px;margin-bottom:2px;font-size:6.5pt;cursor:pointer;${on?'color:#e8500a;font-weight:bold':''}">${chk(on)} ${o}</label>`;}).join('');
+    return `<tr>
+      <td style="border:.4pt solid #ccc;padding:0;vertical-align:top;width:26mm;background:#f9f9f9">
+        <div style="background:#e8500a;color:#fff;font-weight:bold;font-size:6.5pt;padding:2px 4px">${esc(comp.label)}</div>
+        <div style="color:#aaa;font-size:5.5pt;padding:1px 4px 2px">${esc(comp.label_pt)}</div>
+        <div style="padding:2px 4px 4px">${cHtml}</div>
+      </td>
+      ${photoCell(tc.photoBefore,'📷 BEFORE/Antes','orange',comp.id,'before','tb')}
+      <td style="border:.4pt solid #ccc;padding:3px 4px;vertical-align:top;width:26mm;background:#f9f9f9">
+        <div style="font-size:5.5pt;color:#555;font-weight:bold;margin-bottom:2px">Intervention/Intervenção</div>
+        ${iHtml}
+      </td>
+      ${photoCell(tc.photoAfter,'📷 AFTER/Depois','dark',comp.id,'after','ta')}
+      <td style="border:.4pt solid #ccc;padding:3px 4px;vertical-align:top">
+        <div style="font-size:5.5pt;color:#555;font-weight:bold;margin-bottom:2px">Comments/Comentários</div>
+        <textarea class="f" style="width:100%;min-height:16mm;border:1px solid #e5e7eb;border-radius:2px;padding:2px;font-size:6.5pt;resize:vertical">${esc(tc.comment||'')}</textarea>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // ── SPARE PARTS ──
+  const spRows=d.spareRows.map((r,i)=>`<tr style="background:${i%2?'#f5f5f5':'#fff'}">
+    <td style="border:.4pt solid #ccc;padding:3px 5px;font-size:8pt">${esc(r.desc)}</td>
+    <td style="border:.4pt solid #ccc;padding:3px 5px;font-size:8pt;text-align:center;width:18mm">${esc(r.qty)}</td>
+  </tr>`).join('');
+
+  // ── PHOTOS 9/page ──
+  const photoPages=[];
+  for(let i=0;i<photos.length;i+=9) photoPages.push(photos.slice(i,i+9));
+  const photoHtml=photoPages.map((pg,pi)=>`
+    <div style="page-break-before:always">
+      ${S('#e8500a','ATTACHMENTS / PHOTOS — ANEXOS'+(photoPages.length>1?' ('+(pi+1)+'/'+photoPages.length+')':''))}
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;padding:3mm 0">
+        ${pg.map((p,i)=>`<div style="text-align:center">
+          <img src="${p.dataUrl}" style="width:100%;height:52mm;object-fit:cover;border:.4pt solid #ccc;display:block;border-radius:2px">
+          <div style="font-size:6pt;color:#555;padding:1mm 2mm;background:#f5f5f5;border:.4pt solid #ddd">${esc(p.caption||'Photo '+(pi*9+i+1))}</div>
+        </div>`).join('')}
+      </div>
+    </div>`).join('');
+
+  // ── SCANS ──
+  const scansHtml=scans.length?`
+    <div style="page-break-before:always">
+      ${S('#374151','PLANS & DOCUMENTS / PLANOS & DOCUMENTOS')}
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4mm;padding:3mm 0">
+        ${scans.map(s=>s.type==='pdf'
+          ?`<div style="background:#f0f4ff;border:1px solid #bfdbfe;border-radius:4px;padding:6mm;text-align:center"><div style="font-size:22pt">📄</div><div style="font-size:7.5pt;color:#2563a8;font-weight:bold;margin-top:2mm">${esc(s.caption)}</div></div>`
+          :`<div style="text-align:center"><img src="${s.dataUrl}" style="width:100%;max-height:90mm;object-fit:contain;border:.4pt solid #ccc;border-radius:2px;display:block"><div style="font-size:6pt;color:#555;padding:1mm;background:#f5f5f5;border:.4pt solid #ddd">${esc(s.caption)}</div></div>`
+        ).join('')}
+      </div>
+    </div>`:'' ;
+
+  // ── SIGNATURES ──
+  const sigHtml=`<table style="width:100%;border-collapse:collapse;margin-top:5mm">
+    <thead><tr>
+      <th style="background:#1c1c1c;color:#fff;font-size:7pt;padding:3px 5px;border:.4pt solid #888;width:33%;text-align:left">WORK PREP. / Preparação</th>
+      <th style="background:#1c1c1c;color:#fff;font-size:7pt;padding:3px 5px;border:.4pt solid #888;width:33%;text-align:left">TECHNICAL SUPERVISOR / Supervisor Técnico</th>
+      <th style="background:#1c1c1c;color:#fff;font-size:7pt;padding:3px 5px;border:.4pt solid #888;text-align:left">TECHNICAL SUPPORT / Apoio Técnico</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td style="border:.4pt solid #ccc;padding:4px;height:14mm;vertical-align:top"><input class="f" type="text" value="${esc(d.sigWorkprep)}"></td>
+        <td style="border:.4pt solid #ccc;padding:4px;vertical-align:top"><input class="f" type="text" value="${esc(d.sigSupervisor)}"></td>
+        <td style="border:.4pt solid #ccc;padding:4px;vertical-align:top">
+          <input class="f" type="text" value="${esc(d.sigSupport1||'')}" style="margin-bottom:3px">
+          <input class="f" type="text" value="${esc(d.sigSupport2||'')}">
+        </td>
+      </tr>
+      <tr>
+        <td style="border:.4pt solid #ccc;height:16mm;color:#bbb;font-size:7pt;padding:3px">Signature</td>
+        <td style="border:.4pt solid #ccc;color:#bbb;font-size:7pt;padding:3px">Signature</td>
+        <td style="border:.4pt solid #ccc;color:#888;font-size:7pt;padding:3px">Obs. / Observação</td>
+      </tr>
+    </tbody>
+  </table>
+  <div style="text-align:center;color:#bbb;font-size:7pt;margin-top:5mm;border-top:1pt solid #eee;padding-top:3mm">
+    Equipment Disassembly Report — ${esc(fname)} — PROMETIM Manutenção e Serviços LDA
+  </div>`;
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(doctitle)}</title>
+<style>
+@page{size:A4;margin:7mm 7mm 10mm 7mm}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;font-size:7.5pt;color:#111;background:#fff;max-width:196mm}
+table{border-collapse:collapse;width:100%}
+/* col widths: Condition=26mm | Photo=auto | Intervention=26mm | Photo=auto | Comment=auto
+   The 3 flexible cols share remaining space equally */
+.col-cond{width:26mm}
+.col-photo{width:calc((100% - 26mm - 26mm - 52mm)/2)}
+.col-int{width:26mm}
+.col-cmt{width:auto}
+.f{border:none;border-bottom:1pt solid #e5e7eb;padding:1px 2px;font-size:7pt;width:100%;background:transparent;font-family:Arial,sans-serif}
+.f:focus{outline:none;border-bottom-color:#e8500a;background:#fff8f5}
+textarea.f{border:1px solid #e5e7eb!important;border-radius:3px;padding:3px}
+.toolbar{background:#1c1c1c;padding:7px 10px;display:flex;gap:7px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:100}
+.tbtn{padding:7px 14px;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer}
+@media print{
+  .toolbar,.no-print{display:none!important}
+  body{max-width:none}
+}
+</style></head><body>
+
+<div class="toolbar no-print">
+  <img src="${LOGO}" style="height:24px;background:#fff;padding:1px 5px;border-radius:3px">
+  <span style="color:#fff;font-size:11px;font-weight:600;flex:1">${esc(doctitle)}</span>
+  <button class="tbtn" style="background:#e8500a;color:#fff" onclick="window.print()">🖨 Imprimer / PDF</button>
+  <button class="tbtn" style="background:#16a34a;color:#fff" onclick="saveEdited()">💾 Sauvegarder</button>
+  <button class="tbtn" style="background:#374151;color:#fff" onclick="addSpRow()">+ Spare Part</button>
+</div>
+
+<!-- ══ PAGE 1 : HEADER + ACTUATOR ══ -->
+<div style="background:#1c1c1c;color:#fff;padding:4px 7px;display:flex;align-items:center;gap:7px">
+  <img src="${LOGO}" style="height:28px;background:#fff;padding:2px 4px;border-radius:2px;flex-shrink:0">
+  <div style="flex:1">
+    <div style="font-size:9pt;font-weight:bold">EQUIPMENT DISASSEMBLING &amp; ASSEMBLING REPORT</div>
+    <div style="font-size:6pt;font-style:italic;color:#aaa">RELATÓRIO DE DESMONTAGEM &amp; MONTAGEM DE EQUIPAMENTO</div>
+    <div style="font-size:7pt;color:#e8500a;font-weight:bold;margin-top:1px">${esc(doctitle)}</div>
+  </div>
+  <div style="font-size:7pt;white-space:nowrap;text-align:right">Date/Data:<br><b>${esc(d.rdate)}</b></div>
+</div>
+
+<table>
+  <tr>${TD2('CLIENT:',d.client)}${TD2('WO Prometim:',d.wo)}${TD2('WO Client:',d.woClient||'')}</tr>
+  <tr>${TD2('Item / S-No:',d.item)}${TD2('Serial No.:',d.serial)}${TD2('PO/DO/CTR:',d.po)}</tr>
+  <tr>
+    <td style="background:#f5f5f5;font-weight:bold;color:#555;font-size:6.5pt;padding:2px 3px;border:.4pt solid #ccc;white-space:nowrap">Valve type:</td>
+    <td colspan="5" style="border:.4pt solid #ccc;padding:2px 4px">${vtHtml}</td>
+  </tr>
+  <tr>${TD2('Size & Rating:',d.size)}${TD2('Flange:',d.flange)}${TD2('Mat. Code:',d.matcode)}</tr>
+  <tr>${TD2('Other Info:',d.otherinfo)}${TD2('Description:',d.desc)}${TD2('','')}</tr>
+</table>
+
+${S('#e8500a','ACTUATOR EXPERTISE / VERIFICAÇÃO DO ACTUADOR')}
+<table style="margin-top:1px">
+  <tr>
+    <td colspan="5" style="border:.4pt solid #ccc;padding:2px 5px;font-size:7pt;background:#f5f5f5">
+      <b>Type:</b> <input class="f" type="text" value="${esc(d.actType)}" style="width:50px">
+      &nbsp;<b>Mfr:</b> <input class="f" type="text" value="${esc(d.actMfr)}" style="width:60px">
+      &nbsp;<b>Model:</b> <input class="f" type="text" value="${esc(d.actModel)}" style="width:55px">
+      &nbsp;<b>S/N:</b> <input class="f" type="text" value="${esc(d.actSerial)}" style="width:60px">
+    </td>
+  </tr>
+</table>
+<table style="margin-top:1px;table-layout:fixed">
+  <colgroup>
+    <col style="width:26mm">
+    <col style="width:30mm">
+    <col style="width:26mm">
+    <col style="width:30mm">
+    <col>
+  </colgroup>
+  <thead><tr>
+    ${TH('Condition / Estado','','#1c1c1c')}
+    ${TH('📷 BEFORE / Antes','','#e8500a')}
+    ${TH('Intervention / Intervenção','','#1c1c1c')}
+    ${TH('📷 AFTER / Depois','','#374151')}
+    ${TH('Comments / Comentários','','')}
+  </tr></thead>
+  <tbody>${actRows}</tbody>
+</table>
+<div style="background:#fff8e1;border:.4pt solid #ccc;padding:2px 7px;font-size:7pt;margin-top:1px">
+  <b>Status:</b> &nbsp;
+  <label>${chk(d.stConform)} <b>Conform</b>/Conforme</label> &nbsp;
+  <label>${chk(d.stLeak)} <b>Leak</b>/Fuga</label> &nbsp;
+  <label>${chk(d.stStuck)} <b>Stuck</b>/Presa</label>
+</div>
+<div style="border:.4pt solid #ccc;border-top:none;padding:2px 7px;min-height:6mm;font-size:7pt">
+  <b>COMMENTS:</b> <input class="f" type="text" value="${esc(d.actComment)}" style="width:85%">
+</div>
+
+<!-- ══ PAGE 2 : TRIM & BODY ══ -->
+<div style="page-break-before:always">
+${S('#1c1c1c','VALVE COMPONENTS TRIM &amp; BODY / COMPONENTES &amp; CORPO')}
+<table style="margin-top:1px;table-layout:fixed">
+  <colgroup>
+    <col style="width:26mm">
+    <col style="width:30mm">
+    <col style="width:26mm">
+    <col style="width:30mm">
+    <col>
+  </colgroup>
+  <thead><tr>
+    ${TH('Condition / Estado','','#1c1c1c')}
+    ${TH('📷 BEFORE / Antes','','#e8500a')}
+    ${TH('Intervention / Intervenção','','#1c1c1c')}
+    ${TH('📷 AFTER / Depois','','#374151')}
+    ${TH('Comments / Comentários','','')}
+  </tr></thead>
+  <tbody>${trimRows}</tbody>
+</table>
+</div>
+
+<!-- ══ PAGE 3 : SPARE PARTS ══ -->
+<div style="page-break-before:always">
+${S('#e8500a','PARTS TO MACHINE / PEÇAS A USINAR')}
+<div style="border:.4pt solid #ccc;padding:3px 6px;min-height:10mm">
+  <textarea class="f" style="width:100%;min-height:10mm;resize:vertical">${esc(d.partsMachine||'N/A')}</textarea>
+</div>
+${S('#e8500a','COMMENTS INSPECTION / COMENTÁRIOS INSPECÇÃO')}
+<div style="border:.4pt solid #ccc;padding:3px 6px;min-height:14mm">
+  <textarea class="f" style="width:100%;min-height:14mm;resize:vertical">${esc(d.commentInspection||'')}</textarea>
+</div>
+${S('#1c1c1c','SPARE PARTS REQUIRED / PEÇAS SOBRESSELENTES NECESSÁRIAS')}
+<table id="sp-edit-table">
+  <thead><tr>
+    <th style="background:#1c1c1c;color:#fff;font-size:7pt;padding:3px 6px;border:.4pt solid #888;text-align:left">Description / Designação</th>
+    <th style="background:#1c1c1c;color:#fff;font-size:7pt;padding:3px 6px;border:.4pt solid #888;width:18mm;text-align:center">Qty / Qtd</th>
+    <th style="background:#1c1c1c;border:.4pt solid #888;width:18px" class="no-print"></th>
+  </tr></thead>
+  <tbody id="sp-edit-body">${spRows}</tbody>
+</table>
+<button onclick="addSpRow()" class="no-print" style="margin-top:5px;padding:6px 14px;background:#e8500a;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer">+ Ajouter / Adicionar</button>
+<div style="background:#f5f5f5;border:.4pt solid #ccc;padding:2px 6px;font-size:7.5pt;margin-top:3px">
+  <b>Drawing Ref.:</b> <input class="f" type="text" value="${esc(d.drawingRef)}" style="width:75px"> — <input class="f" type="text" value="${esc(d.drawingMfr)}" style="width:90px">
+</div>
+</div>
+
+${photoHtml}
+${scansHtml}
+
+<!-- ══ DERNIÈRE PAGE : SIGNATURES ══ -->
+<div style="page-break-before:always">
+${S('#1c1c1c','SIGNATURES / ASSINATURAS')}
+${sigHtml}
+</div>
+
+<div id="_sp_data_" style="display:none">${JSON.stringify(d.spareRows).replace(/</g,'&lt;')}</div>
+<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+  onload="
+    let _sp=JSON.parse(document.getElementById('_sp_data_').textContent||'[]');
+    window.addSpRow=function(){const t=document.getElementById('sp-edit-body');const x=_sp.length;_sp.push({desc:'',qty:'1'});const tr=document.createElement('tr');tr.style.background=x%2?'#f5f5f5':'#fff';tr.innerHTML='<td style=padding:3px 6px><input placeholder=Description oninput=_sp['+x+'].desc=this.value style=width:100%;border:none;border-bottom:1px solid #e5e7eb;font-size:8pt></td><td style=padding:3px;width:18mm;text-align:center><input value=1 oninput=_sp['+x+'].qty=this.value style=width:100%;border:none;border-bottom:1px solid #e5e7eb;font-size:8pt;text-align:center></td><td class=no-print style=padding:3px;text-align:center><button onclick=this.closest(String.fromCharCode(116,114)).remove() style=background:none;border:none;color:#dc2626;font-size:14px;cursor:pointer>&times;</button></td>';t.appendChild(tr);};
+    window.saveEdited=function(){const c=document.documentElement.cloneNode(true);c.querySelectorAll('.no-print').forEach(e=>e.remove());const b=new Blob(['<!DOCTYPE html>'+c.outerHTML],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=document.title+'-edited.html';a.click();};
+  " style="display:none">
+</body></html>`;
+}
+// ── SHARE HTML ──
+async function doShare(format){
+  document.getElementById('share-modal').style.display='none';
+  const d=collectData();
+  const fname=(d.client||'CLIENT')+'-'+(d.wo||'WO')+'-'+(d.item||'ITEM');
+
+  if(format==='html'){
+    const html=generateReportHTML(d);
+    const blob=new Blob([html],{type:'text/html'});
+    const file=new File([blob],fname+'.html',{type:'text/html'});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({title:'Equipment Report - '+fname,files:[file]});toast('Rapport partagé ✓');return;}
+      catch(e){if(e.name==='AbortError')return;}
+    }
+    // fallback download
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname+'.html';a.click();
+    toast('Rapport téléchargé ✓');
+    return;
+  }
+
+  if(format==='docx'){exportDocx();return;}
+  if(format==='pdf'){exportPdf();return;}
+}
+
+// ── EXPORT PDF (print window) ──
+function exportPdf(){
+  const d=collectData();
+  const html=generateReportHTML(d);
+  const iframe=document.getElementById('pdf-preview-frame');
+  iframe.srcdoc=html;
+  document.getElementById('pdf-overlay').style.display='flex';
+  toast('Aperçu prêt — appuie sur Imprimer');
+}
+function printIframe(){
+  document.getElementById('pdf-preview-frame').contentWindow.focus();
+  document.getElementById('pdf-preview-frame').contentWindow.print();
+}
+
+// ── EXPORT DOCX ──
+function exportDocx(){
+  const d=collectData();
+  if(!window.docx){toast('Chargement DOCX...');return;}
+  const {Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,HeadingLevel,WidthType,ShadingType}=window.docx;
+  const h1=t=>new Paragraph({heading:HeadingLevel.HEADING_1,children:[new TextRun({text:t,color:'e8500a'})]});
+  const h2=t=>new Paragraph({heading:HeadingLevel.HEADING_2,children:[new TextRun({text:t,bold:true,color:'1c1c1c'})]});
+  const kv=(k,v)=>new Paragraph({children:[new TextRun({text:k+': ',bold:true}),new TextRun(String(v||'—'))]});
+  const blank=()=>new Paragraph('');
+  const spTable=new Table({width:{size:100,type:WidthType.PERCENTAGE},rows:[
+    new TableRow({children:['Description / Designação','Qty / Qtd'].map(h=>new TableCell({
+      shading:{type:ShadingType.SOLID,color:'1c1c1c'},
+      children:[new Paragraph({children:[new TextRun({text:h,bold:true,color:'FFFFFF',size:18})]})]}))
+    }),
+    ...d.spareRows.map(r=>new TableRow({children:[r.desc,r.qty].map(v=>new TableCell({
+      children:[new Paragraph({children:[new TextRun({text:String(v||''),size:18})]})]}))
+    }))
+  ]});
+  const doc=new Document({sections:[{properties:{},children:[
+    h1('EQUIPMENT DISASSEMBLING & ASSEMBLING REPORT'),
+    new Paragraph({children:[new TextRun({text:'PROMETIM Manutenção e Serviços LDA',italics:true,color:'888888'})]}),
+    blank(),h2('1. Equipment Identification'),
+    kv('Client',d.client),kv('Work Order',d.wo),kv('Item',d.item),kv('Serial',d.serial),
+    kv('Date',d.rdate),kv('PO/DO/CTR',d.po),kv('Mat.Code',d.matcode),
+    kv('Size & Rating',d.size),kv('Flange',d.flange),kv('Other Info',d.otherinfo),
+    kv('Description',d.desc),kv('Valve Type',d.vtypes.join(', ')),
+    blank(),h2('2. Actuator Expertise'),
+    kv('Type',d.actType),kv('Manufacturer',d.actMfr),kv('Model',d.actModel),kv('Serial',d.actSerial),
+    kv('Status',[d.stConform?'Conform':'',d.stLeak?'Leak':'',d.stStuck?'Stuck':''].filter(Boolean).join(' / ')||'—'),
+    kv('Comments',d.actComment),
+    ...ACT_COMPONENTS.map(c=>{const cp=d.actComps.find(x=>x.id===c.id);const on=(cp?.states||[]).filter(s=>s.val).map(s=>s.key).join(', ');return kv(c.label,on);}),
+    blank(),h2('3. Valve Components — Trim & Body'),
+    ...TRIM_COMPONENTS.flatMap(c=>{const tc=d.trimComps.find(x=>x.id===c.id);
+      const cond=(tc?.cond||[]).filter(s=>s.val).map(s=>s.key).join(', ');
+      const intv=(tc?.int||[]).filter(s=>s.val).map(s=>s.key).join(', ');
+      return[new Paragraph({children:[new TextRun({text:c.label,bold:true,underline:{}})]}),
+        kv('Condition',cond||'—'),kv('Intervention',intv||'—'),kv('Pictures',tc?.pictures||''),kv('Comments',tc?.comment||''),blank()];
+    }),
+    h2('4. Parts to Machine'),new Paragraph(d.partsMachine||'N/A'),blank(),
+    h2('5. Spare Parts Required'),
+    ...(d.spareRows.length?[spTable]:[new Paragraph('None')]),blank(),
+    kv('Drawing Ref.',d.drawingRef+' — '+d.drawingMfr),blank(),
+    h2('6. Comments Inspection'),new Paragraph(d.commentInspection||'—'),blank(),
+    h2('7. Personnel'),kv('Work Prep.',d.sigWorkprep),kv('Supervisor',d.sigSupervisor),
+    kv('Technical Support',d.sigSupport1+(d.sigSupport2?' / '+d.sigSupport2:'')),
+  ]}]});
+  const fname=(d.client||'CLIENT')+'-'+(d.wo||'WO')+'-'+(d.item||'ITEM')+'.docx';
+  Packer.toBlob(doc).then(blob=>{
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;a.click();
+    toast('DOCX téléchargé ✓');
+  });
+}
+
+// ── TOAST ──
+let toastTimer;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+// ── INIT ──
+document.getElementById('rdate').value=new Date().toISOString().split('T')[0];
+buildActuator();
+buildTrim();
+loadDraft();
+</script>
+
+<!-- PDF OVERLAY -->
+<div id="pdf-overlay" style="display:none;position:fixed;inset:0;background:#111;z-index:999;flex-direction:column">
+  <div style="background:#1c1c1c;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+    <span style="color:#fff;font-size:14px;font-weight:600;flex:1">Aperçu PDF</span>
+    <button onclick="printIframe()" style="background:#e8500a;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">🖨 Imprimer / PDF</button>
+    <button onclick="document.getElementById('pdf-overlay').style.display='none'" style="background:#555;color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer">✕</button>
+  </div>
+  <iframe id="pdf-preview-frame" style="flex:1;width:100%;border:none;background:#fff"></iframe>
+</div>
+
+</body></html>
